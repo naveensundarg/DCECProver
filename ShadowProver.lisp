@@ -157,16 +157,23 @@
           (apply-rule :and-elim (first unused-and-elim-args))
           premises)
          Formula
-         (cons `(:and-elim ,(list (princ-to-string (first unused-and-elim-args))))  
-               proof-stack)))))
+         (add-to-proof-stack proof-stack
+                             :and-elim
+                             (rest (first unused-and-elim-args))
+                             (list (princ-to-string (first unused-and-elim-args)))  
+               )))))
 
 (defun handle-R4 (Premises Formula proof-stack)
   (let ((unused-R4-args (unused-R4-args premises))) 
-    (if unused-R4-args (prove (cons (apply-rule :R4 (first unused-R4-args))
-                                    premises)
-                              Formula
-                              (add-to-proof-stack proof-stack :R4 Formula (list
-                                                                           (princ-to-string (first unused-R4-args))))))))
+    (if unused-R4-args 
+        (let ((derived (apply-rule :R4 (first unused-R4-args))))
+          (prove (cons derived premises)
+                 Formula
+                 (add-to-proof-stack proof-stack 
+                                     :R4 
+                                     derived 
+                                     (list
+                                      (princ-to-string (first unused-R4-args)))))))))
 
 
 (defun handle-or-elim (Premises Formula proof-stack)
@@ -182,7 +189,7 @@
                (right-proof 
                 (prove (cons right reduced-premises) Formula  proof-stack)))
           (if (and left-proof right-proof)
-              (add-to-proof-stack proof-stack :or-elim (princ-to-string Formula) (list  (princ-to-string disjunct)) left-proof right-proof))))))
+              (add-to-proof-stack proof-stack :or-elim Formula (list  (princ-to-string disjunct)) left-proof right-proof))))))
 
 
 (defun forward (Premises Formula &optional (proof-stack nil))
@@ -198,4 +205,21 @@
 
 
 
-;;; tests
+;;; show code
+
+(defun draw-node (string) 
+  (gtfl:who 
+   (:div :style "padding:4px;border:1px solid #888;margin-top:4px;margin-bottom:4px;background-color:#eee;"
+         (princ string))))
+
+(defun draw-tree* (tree) 
+  (gtfl:draw-node-with-children  
+   (gtfl:who-lambda (draw-node (car tree)))
+   (mapcar #'(lambda (x) (gtfl:who-lambda (draw-tree* x))) (cdr tree))))
+
+(defun show (proof)
+  (labels ((convert-to-string-tree (x)
+             (cond ((null x) ())
+                   ((atom x) (string-downcase (princ-to-string x)))
+                   (t  (mapcar #'convert-to-string-tree (remove nil x) )))))
+    (gtfl:gtfl-out (draw-tree* (convert-to-string-tree proof)))))
