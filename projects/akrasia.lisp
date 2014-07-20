@@ -31,10 +31,10 @@
          (implies 
           (desires I now (holds (disabled I* a) time))
           (intends I now (happens (action I* (harm a)) time))))
-   '(knows I t1   (forall (act t1 t2)
-                              (iff 
-                               (happens (action I* (refrain act) t2))
-                               (not (happens (action I*  act t2))))))
+   '(knows I t1 (forall (act t1 t2)
+                 (iff 
+                  (happens (action I* (refrain act) t2))
+                  (not (happens (action I*  act t2))))))
    '(< tp now)
    '(< now tf)))
 
