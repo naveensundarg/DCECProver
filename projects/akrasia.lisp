@@ -31,10 +31,10 @@
          (implies 
           (desires I now (holds (disabled I* a) time))
           (intends I now (happens (action I* (harm a)) time))))
-   '(forall (act t1 t2)
-         (knows I t1 (iff 
-                  (happens (action I* (refrain act) t2))
-                  (not (happens (action I*  act t2))))))
+   '(knows I t1   (forall (act t1 t2)
+                              (iff 
+                               (happens (action I* (refrain act) t2))
+                               (not (happens (action I*  act t2))))))
    '(< tp now)
    '(< now tf)))
 
@@ -58,3 +58,9 @@
    *KB-deta*
    *KB-rs* 
    *DCEC*))
+
+
+(5am:test step-1
+  (5am:is-true
+   (prove *akrasia-simulation*
+		     '(believes I now (holds (harmed s I*) tp)))))

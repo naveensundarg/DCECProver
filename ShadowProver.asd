@@ -13,5 +13,7 @@
                (:file "primitiverules")
                (:file "derivedrules")
                (:file "shadowprover")
-               (:file "./tests/dev-tests")))
+               (:file "show")
+               (:file "./tests/dev-tests")
+               (:file "./projects/akrasia")))
 
