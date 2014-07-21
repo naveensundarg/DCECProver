@@ -77,7 +77,7 @@
           'P)))
 
 
-(5am:test dt10
+(5am:test dt11
   (5am:is-true
    (prove '((or (Knows a now P) (Knows b now P))
             (implies (not (Knows a now P)) (Knows b now P))
@@ -85,3 +85,9 @@
             (implies P (Knows b now (and  (knows c t1 Q1)
                                           (knows c t2 Q2)))))
           '(and Q1 Q2))))
+
+(5am:test dt12 "Lemma 6 from http://kryten.mm.rpi.edu/arkoudas.bringsjord.clima.crc.pdf"
+  (5am:is-true (prove '( (not (knows a now P))
+                        (knows a now (implies (not Q) P))
+                        (implies (not Q) (Knows a now (not Q))))
+                      'Q)))
