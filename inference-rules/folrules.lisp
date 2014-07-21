@@ -31,6 +31,7 @@
           (apply-rule :implies-elim (first unused-implies-elim-args))
           premises)
          Formula
+         :proof-stack
          (cons `(:implies-elim  ,(list (princ-to-string (first unused-implies-elim-args))))  
                proof-stack)))))
 
@@ -43,6 +44,7 @@
           (apply-rule :and-elim (first unused-and-elim-args))
           premises)
          Formula
+         :proof-stack 
          (add-to-proof-stack proof-stack
                              :and-elim
                              (rest (first unused-and-elim-args))
@@ -58,8 +60,18 @@
                (right (second disjuncts))
                (reduced-premises (remove disjunct Premises :test #'equalp)) 
                (left-proof 
-                (prove (cons left reduced-premises) Formula proof-stack))
+                (prove (cons left reduced-premises) Formula :proof-stack proof-stack))
                (right-proof 
-                (prove (cons right reduced-premises) Formula  proof-stack)))
+                (prove (cons right reduced-premises) Formula :proof-stack proof-stack)))
           (if (and left-proof right-proof)
-              (add-to-proof-stack proof-stack :or-elim Formula (list  (princ-to-string disjunct)) left-proof right-proof))))))
+              (add-to-proof-stack proof-stack :or-elim Formula (list
+  (princ-to-string disjunct)) left-proof right-proof))))))
+
+
+(defun handle-reductio (Premises Formula proof-stack)
+  (let* ((absurd '(and p  (not p)))
+         (meaningful?  (not (false? Formula)))
+         (reductio (if meaningful? (prove (cons `(not ,Formula) Premises) 
+                                          absurd 
+                                          :proof-stack proof-stack))))
+    (if reductio (add-to-proof-stack proof-stack absurd (list reductio)))))

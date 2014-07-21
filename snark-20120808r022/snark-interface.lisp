@@ -29,8 +29,11 @@
   (snark:use-paramodulation t)
   (snark:allow-skolem-symbols-in-answers nil))
 
-(defun prove-from-axioms (axioms f &key (time-limit 5) (verbose nil))
+
+(defun prove-from-axioms (axioms f &key (time-limit 5) (verbose nil)
+                                     sortal-setup-fn)
   (setup-snark :time-limit time-limit :verbose verbose)
+  (if sortal-setup-fn (funcall sortal-setup-fn))
   (mapcar #'snark::assert (mapcar #'!@ axioms))
   (if (equalp :PROOF-FOUND (snark:prove (!@ f)))
       t nil))

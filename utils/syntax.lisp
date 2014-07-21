@@ -63,3 +63,15 @@
          (list 'believes time _ F)) 
      (cons time (times F)))
     (_ ())))
+
+
+(defun modal-F (formula)
+  (optima:match formula
+    ((or (list 'common _ F) 
+         (list 'knows _ _ F)
+         (list 'believes _ _ F)) 
+     F)
+    (_ nil)))
+
+
+(defun consequent (F) (second (args F)))

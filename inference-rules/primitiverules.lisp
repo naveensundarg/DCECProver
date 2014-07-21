@@ -26,7 +26,7 @@
         (let ((derived (apply-rule :R4 (first unused-R4-args))))
           (prove (cons derived premises)
                  Formula
-                 (add-to-proof-stack proof-stack 
+                :proof-stack (add-to-proof-stack proof-stack 
                                      :R4 
                                      derived 
                                      (list

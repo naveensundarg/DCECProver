@@ -60,7 +60,14 @@
    *DCEC*))
 
 
-(5am:test step-1
+(5am:test D2
   (5am:is-true
    (prove *akrasia-simulation*
 		     '(believes I now (holds (harmed s I*) tp)))))
+
+(5am:test D3
+  (5am:is-true
+   (prove *akrasia-simulation*
+		     '(iff 
+		       (happens (action I* (refrain (harm S)) tf))
+		       (not (happens (action I* (harm S) tf)))))))
