@@ -10,6 +10,13 @@
         (apply #'append 
                (mapcar (lambda (x) (mapcar (lambda (y) (cons x y)) rst)) 
                        (first sets))))))
+
+(defun cartesian-power (set n)
+  (labels ((n-tuple (set n)
+             (if (zerop n) 
+                 ()
+                 (cons set (n-tuple set (1- n))))))
+    (cartesian-product (n-tuple set n))))
 (defun permute (seq)
   (cond ((null seq) '())
         ((= 1 (length seq)) (list seq))

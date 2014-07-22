@@ -74,4 +74,4 @@
          (reductio (if meaningful? (prove (cons `(not ,Formula) Premises) 
                                           absurd 
                                           :proof-stack proof-stack))))
-    (if reductio (add-to-proof-stack proof-stack absurd (list reductio)))))
+    (if reductio (add-to-proof-stack proof-stack absurd reductio))))

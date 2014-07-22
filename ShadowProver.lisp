@@ -3,9 +3,9 @@
 (in-package #:shadowprover)
 
 (defun declare-sorts ()
-  (declare-sort 'Agent)
-  (declare-subsort 'Moment 'Number)
-  (declare-subsort 'Fluent))
+  (snark:declare-sort 'Agent)
+  (snark:declare-subsort 'Moment 'Number)
+  (snark:declare-subsort 'Fluent))
 
 
 (defun declare-functors ())
@@ -37,7 +37,9 @@
 
 (defun forward (Premises Formula &optional (proof-stack nil))
     (or 
+     (handle-DR3 Premises Formula proof-stack)
      (handle-DR4 Premises Formula proof-stack)
+     (handle-DR5 Premises Formula proof-stack)
      (handle-DR6 Premises Formula proof-stack)
      (handle-R4 Premises Formula proof-stack)
      (handle-and-elim Premises Formula proof-stack)
