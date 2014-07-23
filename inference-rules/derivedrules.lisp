@@ -1,41 +1,81 @@
 (in-package #:shadowprover)
 
 
-(defun unused-DR6-args (premises)
-  (filter (lambda (formula)
-            (optima:match formula
-              ((list (list 'knows a time (list 'implies _ Cons))
-                     (list 'knows _ _ _))
-               (if (elem `(Knows ,a ,time ,Cons) premises) nil t))))
-          (filter (lambda (pair)
-                    (let ((K1 (first pair))
-                          (K2 (second pair)))
-                        (and (knowledge? K1)
-                             (knowledge? K2)
-                             (implies? (modal-F K1))
-                             (equalp (first (args (modal-F K1)))
-                                     (modal-F K2)))))
-                  (cartesian-product (list premises premises)))))
-
-
-(defun handle-DR6 (Premises Formula proof-stack)
-  (let ((unused-DR6-args (unused-DR6-args premises))) 
-    (if unused-DR6-args  
-        (prove 
-         (cons 
-          (apply-rule :DR6 (first unused-DR6-args))
-          premises)
-         Formula
-         :proof-stack
-         (cons `(:DR6  ,(list (princ-to-string (first unused-DR6-args))))  
-               proof-stack)))))
+(defun handle-DR2 (Premises Formula proof-stack)
+  (let ((fresh
+         (filter (lambda (CommonK-Agent)
+                   (and (common-knowledge? (first CommonK-Agent)) 
+                        (not (elem `(knows ,(second CommonK-Agent)
+                                           ,(modal-time (first CommonK-Agent))
+                                           ,(modal-F (first CommonK-Agent)))
+                                   Premises))))
+                 (cartesian-product (list premises (agents* (cons Formula Premises)))))))
+    (if fresh 
+        (let ((derived (optima:match (first fresh)
+                         ((list (list 'common time F) agent) `(knows ,agent
+                                                                     ,time ,F)))))
+          (prove (cons derived premises)
+                 formula
+                 :proof-stack 
+                 (add-to-proof-stack proof-stack 
+                                     :DR2 
+                                     derived 
+                                     (list
+                                      (princ-to-string (first fresh)))))))))
 
 
 
 
-(define-type-1-expander handle-DR3 P (list 'common _ P))
-(define-type-1-expander handle-DR4 (list 'knows a time P) (list 'sees a time P))
-(define-type-1-expander handle-DR5 (list 'believes a time P) (list 'knows a time P))
+(defun handle-DR9 (Premises Formula proof-stack)
+  (let ((fresh
+         (filter (lambda (Knows-Term)
+                   (let ((K (first Knows-Term))
+                         (term (second Knows-Term)))
+                       (and (knowledge? K) 
+                            (universal? (modal-F K))
+                            (not (elem `(knows 
+                                         ,(modal-agent K)
+                                         ,(modal-time K)
+                                         ,(specialize (modal-F K) term))
+                                       Premises)))))
+                 (cartesian-product (list premises (terms* (cons Formula Premises)))))))
+    (if fresh 
+        (let ((derived (optima:match (first fresh)
+                         ((list (list 'knows agent time F) term) 
+                          `(knows ,agent
+                                  ,time ,(specialize F term))))))
+          (prove (cons derived premises)
+                 formula
+                 :proof-stack 
+                 (add-to-proof-stack proof-stack 
+                                     :DR2 
+                                     derived 
+                                     (list
+                                      (princ-to-string (first fresh)))))))))
+
+(define-type-1-expander handle-DR3 nil
+  P (list 'common _ P))
+
+(define-type-1-expander handle-DR4 nil 
+  (list 'knows a time P) 
+  (list 'sees a time P))
+
+(define-type-1-expander handle-DR5 nil 
+  (list 'believes a time P) 
+  (list 'knows a time P))
+
+(define-type-1-expander handle-DR6 
+    (lambda (pair)
+      (let ((K1 (first pair))
+            (K2 (second pair)))
+        (and (knowledge? K1)
+             (knowledge? K2)
+             (implies? (modal-F K1))
+             (equalp (antecedent  (modal-F K1))
+                     (modal-F K2))))) 
+  (list 'knows a time P2) 
+  (list 'knows a time (list 'implies _ P2))
+  (list 'knows _ _ _)) 
+
+
  
-
-;(define-type-1-expander handle-DR4 (list 'knows a time P) (list 'sees _ P))

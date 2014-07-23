@@ -2,12 +2,15 @@
 
 
 
-(defmacro define-type-1-expander (name out &rest in) 
+(defmacro define-type-1-expander (name constraint out &rest in)  
   `(defun ,name (premises formula proof-stack)
-    (let ((fresh (filter (lambda (formula)
-                           (optima:match formula
-                           (,(cons 'list in) (if (elem ,out premises) nil t))))
-                         (cartesian-power premises ,(length in))))) 
+    (let ((fresh (filter 
+                  (lambda (formula)
+                    (optima:match formula
+                      (,(cons 'list in) (if (elem ,out premises) nil t))))
+                  (let ((premises^n (cartesian-power premises ,(length in))))
+                    (if ,constraint (filter ,constraint premises^n) 
+                        premises^n))))) 
       (if fresh 
           (let ((derived (optima:match (first fresh)
                            (,(cons 'list in) ,out))))

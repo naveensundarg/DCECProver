@@ -71,24 +71,20 @@
 
 (5am:test dt10
   (5am:is-true
-   (prove '((or (Knows a now P) (Knows b now P))
-            (implies (not (Knows a now P)) (Knows b now P))
-            (implies (not (Knows b now P)) (Knows a now P)))
+   (prove '((or (Knows a now P) (Knows b now P)))
           'P)))
 
 
 (5am:test dt11
   (5am:is-true
    (prove '((or (Knows a now P) (Knows b now P))
-            (implies (not (Knows a now P)) (Knows b now P))
-            (implies (not (Knows b now P)) (Knows a now P))
             (implies P (Knows b now (and  (knows c t1 Q1)
                                           (knows c t2 Q2)))))
           '(and Q1 Q2))))
 
 (5am:test dt12 
   "Lemma 6 from http://kryten.mm.rpi.edu/arkoudas.bringsjord.clima.crc.pdf"
-  (5am:is-true (prove '( (not (knows a now P))
+  (5am:is-true (prove '((not (knows a now P))
                         (knows a now (implies (not Q) P))
                         (implies (not Q) (Knows a now (not Q))))
                       'Q)))
@@ -97,3 +93,9 @@
   "testing dr3"
   (5am:is-true 
    (prove (list '(common now P)) 'P)))
+
+(5am:test dt14 
+  (5am:is-true
+   (prove (list '(implies (exists (x) (implies (Bird x) (forall (y) (Bird y))))
+                  (common now (exists (x) (implies (Bird x) (forall (y) (Bird y)))))))
+          '(knows a now (exists (x) (implies (Bird x) (forall (y) (Bird y))))))))

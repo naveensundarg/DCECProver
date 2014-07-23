@@ -48,13 +48,26 @@
     ((list 'implies _ _) t) 
     (_ nil)))
 
+(defun universal? (formula) 
+  (optima:match formula
+    ((list 'forall _ _) t) 
+    (_ nil)))
 (defun agents (formula)
   (optima:match formula
     ((or (list 'knows a _ F)
          (list 'believes a _ F)) 
-     (cons a (agents F)))
-    (_ ())))
+     (remove-duplicates (cons a (agents F))))
+    ((list 'not F) (agents F))
+    ((list _ A B) (append (agents a) (agents b)))
+    (_ nil)))
 
+(defun agents* (formulae)
+  (remove-duplicates 
+   (reduce #'append (mapcar #'agents formulae))))
+
+(defun agent-tuples (formulae n)
+  (let ((agents (agents* formulae) ))
+    (cartesian-power agents n)))
 
 (defun times (formula)
   (optima:match formula
@@ -65,6 +78,21 @@
     (_ ())))
 
 
+(defun modal-agent (formula)
+  (optima:match formula
+    ((or (list 'knows a _ _)
+         (list 'believes a _ _)) 
+     a)
+    (_ nil)))
+
+(defun modal-time (formula)
+  (optima:match formula
+    ((or (list 'common time _) 
+         (list 'knows _ time _)
+         (list 'believes _ time _)) 
+     time)
+    (_ nil)))
+
 (defun modal-F (formula)
   (optima:match formula
     ((or (list 'common _ F) 
@@ -73,5 +101,80 @@
      F)
     (_ nil)))
 
-
+(defun antecedent (F) (first (args F)))
 (defun consequent (F) (second (args F)))
+
+(defun compound-F? (formula)
+  (optima:match formula 
+      ((or (list (or 'or 'and 'implies 'iff) _ _)
+           (list (or 'knows 'believes) _ _ _)
+           (list 'not _)
+           (list (or 'forall 'exists) _ _)) t)))
+
+(defun compound? (formula) (not (atom formula)))
+ 
+(defun subs (f)
+  (if (atom f)
+      (list f)
+      (cons f (reduce #'append (mapcar #'subs (rest f))))))
+
+(defun terms (formula)
+  (labels ((handle-complex-vs-atom (P)
+             (if (compound-F? P) 
+                 (terms P) 
+                 (reduce #'append (mapcar #'subs (rest P))))))
+    (let ((terms-with-dupes 
+           (optima:match formula
+             ((list 'common agent F) 
+              (append (list agent)
+                      (terms agent) 
+                      (handle-complex-vs-atom F)))
+             ((list (or 'believes 'knows) agent time F) 
+              (append (list agent) (list time)
+                      (terms agent) (terms time)
+                      (handle-complex-vs-atom F)))
+             ((list (or 'and 'or 'implies 'iff) P1 P2) 
+              (append (handle-complex-vs-atom P1)
+                      (handle-complex-vs-atom P2)))
+             ((list 'not P) 
+              (handle-complex-vs-atom P))
+             ((list (or 'forall 'exists) _ P) 
+              (handle-complex-vs-atom P))
+             ((guard x (compound? x)) 
+              (reduce #'append (mapcar #'subs (rest x))))
+             ((guard x (atom x)) (list x)))))
+      (remove-duplicates terms-with-dupes :test #'equalp))))
+
+(defun terms* (formulae)
+  (reduce #'append (mapcar #'terms formulae)))
+
+
+(defun quantifier (quantifiedF)
+  (optima:match quantifiedF 
+    ((list 'forall _ _) 'forall)
+    ((list 'exists _ _) 'exists)))
+
+(defun conn (F)
+  (optima:match F 
+    ((list (or 'and 'or 'iff 'implies) _ _) (first F))
+    ((list 'not _) 'not)))
+
+(defun kernel (quantifiedF)
+  (optima:match quantifiedF 
+    ((list (or 'forall 'exists) _ K) K)))
+
+(defun top-var (quantifiedF)
+  (optima:match quantifiedF 
+    ((list (or 'forall 'exists) vars _) (first vars))))
+
+(defun rest-vars (quantifiedF)
+  (optima:match quantifiedF 
+    ((list 'forall vars _) (rest vars))
+    ((list 'exists vars _) (rest vars))))
+
+(defun specialize (Univ term)
+  (if (rest-vars Univ)
+      (list (quantifier Univ ) 
+            (rest-vars Univ) 
+            (subst term  (top-var Univ) (kernel Univ)))
+      (subst term  (top-var Univ) (kernel Univ))))

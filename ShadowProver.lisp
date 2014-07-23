@@ -26,10 +26,6 @@
     (:R1 (optima:match args ((list (list 'C _ F)
                                    a1 a2 a3 t1 t2 t3)
                              `(knows ,a1 ,t1 (knows ,a2 ,t2 (knows ,a3 ,t3 ,F))))))
-    (:R4 (optima:match (first args) ((list 'knows _ _ F) F)))
-    (:DR4 (optima:match (first args) 
-            ((list 'knows a time F)
-             `(believes ,a ,time ,F))))
     (:DR6 (optima:match (first args) 
             ((list (list 'knows a time F) _)
              `(knows ,a ,time ,(consequent F)))))
@@ -37,13 +33,16 @@
 
 (defun forward (Premises Formula &optional (proof-stack nil))
     (or 
+     (handle-DR2 Premises Formula proof-stack)
      (handle-DR3 Premises Formula proof-stack)
      (handle-DR4 Premises Formula proof-stack)
      (handle-DR5 Premises Formula proof-stack)
      (handle-DR6 Premises Formula proof-stack)
+     (handle-DR9 Premises Formula proof-stack)
      (handle-R4 Premises Formula proof-stack)
      (handle-and-elim Premises Formula proof-stack)
      (handle-implies-elim Premises Formula proof-stack)
+     (introduce-theorems Premises Formula proof-stack)
      (handle-or-elim Premises Formula proof-stack)
      (handle-reductio Premises Formula proof-stack)))
 

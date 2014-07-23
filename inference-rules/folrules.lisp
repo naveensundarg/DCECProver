@@ -75,3 +75,19 @@
                                           absurd 
                                           :proof-stack proof-stack))))
     (if reductio (add-to-proof-stack proof-stack absurd reductio))))
+
+
+ 
+(defun introduce-theorems (Premises Formula proof-stack)
+  (let ((fresh (filter #'implies? Premises))) 
+    (if (and fresh (prove nil (antecedent (first fresh))))  
+        (prove 
+         (cons 
+          (consequent (first fresh))
+          premises)
+         Formula
+         :proof-stack 
+         (add-to-proof-stack proof-stack
+                             :implies
+                             (first fresh)
+                             (list (princ-to-string (first fresh))))))))
