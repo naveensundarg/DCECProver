@@ -46,12 +46,17 @@
      (handle-or-elim Premises Formula proof-stack)
      (handle-reductio Premises Formula proof-stack)))
 
-(defun make-declarer  ()
-;  (lambda () (declare-all-sorts-and-functors) (mapcar ))
-  )
+ 
 
-(defun prove (Premises Formula &key (proof-stack nil))
-  (if (prove-from-axioms (shadow-all Premises) formula :time-limit 3 :verbose nil) 
+(defparameter *debug* nil)
+(defun debug-prove (Premises Formula caller)
+  (format t "Total Premises: ~a | Formula: ~a | Caller: ~a ~%" (length
+                                                                Premises)
+          Formula caller))
+
+(defun prove (Premises Formula &key (proof-stack nil) (caller nil))
+  (if *debug* (debug-prove Premises Formula caller))
+  (if (prove-from-axioms (shadow-all Premises) formula :time-limit 2 :verbose nil) 
        (add-to-proof-stack proof-stack :FOL Formula) 
       (forward Premises Formula proof-stack)))
 

@@ -21,14 +21,12 @@
                                      :DR2 
                                      derived 
                                      (list
-                                      (princ-to-string (first fresh)))))))))
+                                      (princ-to-string (first fresh))))
+                 :caller 'handle-DR2)))))
 
 
-
-
-(defun handle-DR9 (Premises Formula proof-stack)
-  (let ((fresh
-         (filter (lambda (Knows-Term)
+(defun unused-DR9-terms (Premises Formula)
+(filter (lambda (Knows-Term)
                    (let ((K (first Knows-Term))
                          (term (second Knows-Term)))
                        (and (knowledge? K) 
@@ -38,8 +36,14 @@
                                          ,(modal-time K)
                                          ,(specialize (modal-F K) term))
                                        Premises)))))
-                 (cartesian-product (list premises (terms* (cons Formula Premises)))))))
-    (if fresh 
+                 (cartesian-product (list premises 
+                                          (terms* (cons Formula Premises))))))
+
+
+(defun handle-DR9 (Premises Formula proof-stack)
+  (let ((fresh
+         (unused-DR9-terms Premises Formula)))
+     (if fresh 
         (let ((derived (optima:match (first fresh)
                          ((list (list 'knows agent time F) term) 
                           `(knows ,agent
@@ -48,10 +52,11 @@
                  formula
                  :proof-stack 
                  (add-to-proof-stack proof-stack 
-                                     :DR2 
+                                     :D9 
                                      derived 
                                      (list
-                                      (princ-to-string (first fresh)))))))))
+                                      (princ-to-string (first fresh))))
+                 :caller 'handle-DR9)))))
 
 (define-type-1-expander handle-DR3 nil
   P (list 'common _ P))

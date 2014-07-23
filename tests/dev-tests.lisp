@@ -99,3 +99,9 @@
    (prove (list '(implies (exists (x) (implies (Bird x) (forall (y) (Bird y))))
                   (common now (exists (x) (implies (Bird x) (forall (y) (Bird y)))))))
           '(knows a now (exists (x) (implies (Bird x) (forall (y) (Bird y))))))))
+
+
+(5am:test dt15
+  (5am:is-true
+   (prove (list '(knows b now (knows a t (forall (x) (P x)))))
+          '(P (f c)))))

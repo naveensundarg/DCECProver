@@ -122,7 +122,7 @@
   (labels ((handle-complex-vs-atom (P)
              (if (compound-F? P) 
                  (terms P) 
-                 (reduce #'append (mapcar #'subs (rest P))))))
+                 (if (not (atom P)) (reduce #'append (mapcar #'subs (rest P)))))))
     (let ((terms-with-dupes 
            (optima:match formula
              ((list 'common agent F) 
@@ -138,11 +138,11 @@
                       (handle-complex-vs-atom P2)))
              ((list 'not P) 
               (handle-complex-vs-atom P))
-             ((list (or 'forall 'exists) _ P) 
-              (handle-complex-vs-atom P))
+             ((list (or 'forall 'exists) vars P) 
+              (set-difference (handle-complex-vs-atom P) vars :test #'equalp))
              ((guard x (compound? x)) 
               (reduce #'append (mapcar #'subs (rest x))))
-             ((guard x (atom x)) (list x)))))
+             ((guard x (atom x)) (handle-complex-vs-atom x)))))
       (remove-duplicates terms-with-dupes :test #'equalp))))
 
 (defun terms* (formulae)
