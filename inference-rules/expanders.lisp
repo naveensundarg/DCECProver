@@ -3,7 +3,7 @@
 
 
 (defmacro define-type-1-expander (name constraint out &rest in)  
-  `(defun ,name (premises formula proof-stack)
+  `(defun ,name (premises formula sortal-fn proof-stack)
     (let ((fresh (filter 
                   (lambda (formula)
                     (optima:match formula
@@ -14,8 +14,9 @@
       (if fresh 
           (let ((derived (optima:match (first fresh)
                            (,(cons 'list in) ,out))))
-            (prove (cons derived premises)
+            (prove! (cons derived premises)
                    formula
+                   :sortal-fn sortal-fn
                    :proof-stack 
                    (add-to-proof-stack proof-stack 
                                        ',name 

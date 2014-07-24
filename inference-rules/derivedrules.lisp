@@ -1,7 +1,7 @@
 (in-package #:shadowprover)
 
 
-(defun handle-DR2 (Premises Formula proof-stack)
+(defun handle-DR2 (Premises Formula sortal-fn proof-stack)
   (let ((fresh
          (filter (lambda (CommonK-Agent)
                    (and (common-knowledge? (first CommonK-Agent)) 
@@ -14,8 +14,9 @@
         (let ((derived (optima:match (first fresh)
                          ((list (list 'common time F) agent) `(knows ,agent
                                                                      ,time ,F)))))
-          (prove (cons derived premises)
+          (prove! (cons derived premises)
                  formula
+                 :sortal-fn sortal-fn
                  :proof-stack 
                  (add-to-proof-stack proof-stack 
                                      :DR2 
@@ -40,7 +41,7 @@
                                           (terms* (cons Formula Premises))))))
 
 
-(defun handle-DR9 (Premises Formula proof-stack)
+(defun handle-DR9 (Premises Formula sortal-fn proof-stack)
   (let ((fresh
          (unused-DR9-terms Premises Formula)))
      (if fresh 
@@ -48,8 +49,9 @@
                          ((list (list 'knows agent time F) term) 
                           `(knows ,agent
                                   ,time ,(specialize F term))))))
-          (prove (cons derived premises)
+          (prove! (cons derived premises)
                  formula
+                 :sortal-fn sortal-fn
                  :proof-stack 
                  (add-to-proof-stack proof-stack 
                                      :D9 

@@ -1,6 +1,12 @@
 
 (in-package #:shadowprover)
 
+(defun try (f cases)
+  (if (null cases)
+      nil
+      (let ((first-try (funcall f (first cases))))
+	(if first-try (values first-try (first cases)) (try f (rest cases))))))
+
 (defun elem (e set) (member e set :test #'equalp))
 (defun args (F) (rest F))
 (defun cartesian-product (sets)

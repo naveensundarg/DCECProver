@@ -2,14 +2,14 @@
 
 (in-package #:shadowprover)
 
+
 (defun declare-default-sorts ()
   (snark:declare-sort 'Object)
   (snark:declare-sort 'Action)
   (snark:declare-sort 'ActionType)
-  (snark:declare-sort 'ActionType)
-  (snark:declare-subsort 'Fluent))
+  (snark:declare-sort 'Fluent)
   (snark:declare-sort 'Agent)
-  (snark:declare-subsort 'Moment 'Number)
+  (snark:declare-subsort 'Moment 'Number))
 
 
 (defun declare-default-functors ())
@@ -18,9 +18,13 @@
 (defun true? (x) (prove-from-axioms nil x))
 (defun false? (x) (prove-from-axioms nil `(not ,x)))
 
-(defun declare-all-sorts-and-functors (sort-decls)
-  (declare-default-sorts)
-  (declare-default-functors))
+(defun declarer-sorts-and-functors (sorts subsorts functions relations )
+  (lambda () (declare-default-sorts)
+          (declare-default-functors)
+          (mapcar #'snark:declare-sort sorts)
+          (mapcar (lambda (s) (apply #'snark:declare-subsort s)) subsorts)
+          (mapcar (lambda (s) (apply #'snark:declare-function s)) functions)
+          (mapcar (lambda (s) (apply #'snark:declare-relation s)) relations)))
 
 (defun apply-rule (rule &rest args)
   (case rule
@@ -35,20 +39,22 @@
              `(knows ,a ,time ,(consequent F)))))
     (otherwise (error "~ unimplemented rule." rule))))
 
-(defun forward (Premises Formula &optional (proof-stack nil))
-    (or 
-     (handle-DR2 Premises Formula proof-stack)
-     (handle-DR3 Premises Formula proof-stack)
-     (handle-DR4 Premises Formula proof-stack)
-     (handle-DR5 Premises Formula proof-stack)
-     (handle-DR6 Premises Formula proof-stack)
-     (handle-DR9 Premises Formula proof-stack)
-     (handle-R4 Premises Formula proof-stack)
-     (handle-and-elim Premises Formula proof-stack)
-     (handle-implies-elim Premises Formula proof-stack)
-     (introduce-theorems Premises Formula proof-stack)
-     (handle-or-elim Premises Formula proof-stack)
-     (handle-reductio Premises Formula proof-stack)))
+(defun forward (Premises Formula sortal-fn &optional (proof-stack nil))
+    (try 
+     (lambda (fn) (funcall fn Premises Formula sortal-fn proof-stack))
+     (mapcar #'symbol-function 
+             '(handle-DR2 
+               handle-DR3
+               handle-DR4
+               handle-DR5
+               handle-DR6
+               handle-DR9
+               handle-R4
+               handle-and-elim
+               handle-implies-elim
+               introduce-theorems
+               handle-or-elim
+               handle-reductio))))
 
  
 
@@ -57,16 +63,49 @@
   (format t "Total Premises: ~a | Formula: ~a | Caller: ~a ~%" (length
                                                                 Premises)
           Formula caller))
-(defparameter *sorts* nil)2
-(defun prove (Premises Formula &key   (proof-stack nil) (caller nil))
+(defparameter *sorts* nil)
+
+(defun make-shadow-declarations (shadows)
+  (mapcar (lambda (s) `(,s 0)) shadows))
+
+(defun concatfn (f g) (lambda () (if f (funcall f)) (if g (funcall g))))
+
+
+(defun prove (Premises Formula &key 
+                                 (sorts nil) 
+                                 (subsorts nil)
+                                 (functions nil)
+                                 (relations nil)
+                                 (proof-stack nil) (caller nil))
+  (let ((sortal-fn (declarer-sorts-and-functors sorts
+                                                subsorts
+                                                functions
+                                                relations)))
+    (prove! Premises Formula :sortal-fn sortal-fn)))
+
+
+(defun prove! (Premises Formula &key 
+                                 sortal-fn
+                                  
+                                 (proof-stack nil) (caller nil))
   (if *debug* (debug-prove Premises Formula caller))
-  (if (prove-from-axioms (shadow-all Premises) formula :time-limit 2 :verbose
-                         nil ) 
+  (if  (multiple-value-bind (shadowed shadows) 
+           (shadow-all Premises)
+         (let ((sortal-setup   
+                (concatfn sortal-fn 
+                          (lambda () 
+                            (mapcar (lambda (s) (apply #'snark:declare-relation
+                                 s))
+                                    (make-shadow-declarations shadows))))))
+           (prove-from-axioms shadowed formula 
+                              :time-limit 2 
+                              :verbose nil :sortal-setup-fn sortal-setup))) 
        (add-to-proof-stack proof-stack :FOL Formula) 
-      (forward Premises Formula proof-stack)))
+       (forward Premises Formula sortal-fn proof-stack )))
 
 
 
 ;;; show code
 
-(defun )
+;((defun )
+

@@ -23,27 +23,29 @@
                   (cartesian-product (list premises premises)))))
 
 
-(defun handle-implies-elim (Premises Formula proof-stack)
+(defun handle-implies-elim (Premises Formula sortal-fn proof-stack)
   (let ((unused-implies-elim-args (unused-implies-elim-args premises))) 
     (if unused-implies-elim-args  
-        (prove 
+        (prove! 
          (cons 
           (apply-rule :implies-elim (first unused-implies-elim-args))
           premises)
          Formula
+         :sortal-fn sortal-fn
          :proof-stack
          (cons `(:implies-elim  ,(list (princ-to-string (first unused-implies-elim-args))))  
                proof-stack)))))
 
 
-(defun handle-and-elim (Premises Formula proof-stack)
+(defun handle-and-elim (Premises Formula sortal-fn proof-stack)
   (let ((unused-and-elim-args (unused-and-elim-args premises))) 
     (if unused-and-elim-args  
-        (prove 
+        (prove! 
          (append 
           (apply-rule :and-elim (first unused-and-elim-args))
           premises)
          Formula
+         :sortal-fn sortal-fn
          :proof-stack 
          (add-to-proof-stack proof-stack
                              :and-elim
@@ -51,7 +53,7 @@
                              (list (princ-to-string (first unused-and-elim-args))))))))
 
 
-(defun handle-or-elim (Premises Formula proof-stack)
+(defun handle-or-elim (Premises Formula sortal-fn proof-stack)
   (let ((unused-or-args (unused-or-args premises))) 
     (if unused-or-args 
         (let* ((disjunct (first unused-or-args))
@@ -60,32 +62,39 @@
                (right (second disjuncts))
                (reduced-premises (remove disjunct Premises :test #'equalp)) 
                (left-proof 
-                (prove (cons left reduced-premises) Formula :proof-stack proof-stack))
+                (prove! (cons left reduced-premises) 
+                        Formula :sortal-fn 
+                        sortal-fn :proof-stack proof-stack))
                (right-proof 
-                (prove (cons right reduced-premises) Formula :proof-stack proof-stack)))
+                (prove! (cons right reduced-premises)
+                        Formula :sortal-fn
+                        sortal-fn :proof-stack proof-stack)))
           (if (and left-proof right-proof)
               (add-to-proof-stack proof-stack :or-elim Formula (list
   (princ-to-string disjunct)) left-proof right-proof))))))
 
 
-(defun handle-reductio (Premises Formula proof-stack)
+(defun handle-reductio (Premises Formula sortal-fn proof-stack)
   (let* ((absurd '(and p  (not p)))
          (meaningful?  (not (false? Formula)))
-         (reductio (if meaningful? (prove (cons `(not ,Formula) Premises) 
+         (reductio (if meaningful? (prove! (cons `(not ,Formula) Premises) 
                                           absurd 
-                                          :proof-stack proof-stack))))
+                                          :sortal-fn sortal-fn
+                                          :proof-stack proof-stack
+                                          :caller :reductio))))
     (if reductio (add-to-proof-stack proof-stack absurd reductio))))
 
 
  
-(defun introduce-theorems (Premises Formula proof-stack)
+(defun introduce-theorems (Premises Formula sortal-fn proof-stack)
   (let ((fresh (filter #'implies? Premises))) 
-    (if (and fresh (prove nil (antecedent (first fresh))))  
-        (prove 
+    (if (and fresh (prove! nil (antecedent (first fresh))))  
+        (prove! 
          (cons 
           (consequent (first fresh))
           premises)
          Formula
+         :sortal-fn sortal-fn
          :proof-stack 
          (add-to-proof-stack proof-stack
                              :implies

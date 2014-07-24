@@ -12,10 +12,14 @@
     (_ nil)))
 
 (defun connective (F) (first F))
+(defparameter *shadows* nil)
+
 (defun shadow-formula (formula)
   "Converts a modal formula to its propositional shadow."
   (if (is-modal? formula)  
-      (intern (princ-to-string formula))
+      (let ((shadow (intern (princ-to-string formula))))
+        (setf *shadows* (cons shadow *shadows*))
+        shadow)
       (optima:match formula 
         ((list (or 'and 'or 'implies 'iff) P1 P2)
          (list (connective formula)
@@ -30,8 +34,10 @@
         (_ formula))))
 
 (defun shadow-all (Formulae)
-  (mapcar (lambda (formula) (shadow-formula formula)) 
-          Formulae))
+  (let ((*shadows* nil)) 
+    (let ((shadowed (mapcar (lambda (formula) (shadow-formula formula)) 
+                            Formulae)))
+      (values shadowed *shadows*))))
 
 (defun filter (pred sequence &rest args)
   (apply #'remove-if (append (list (complement pred) sequence)

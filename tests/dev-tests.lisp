@@ -16,7 +16,7 @@
   (5am:is-true 
    (prove (list 
            '(knows jack now Bird-Theorem))
-          'Bird-Theorem)))
+          'Bird-Theorem )))
 
 (5am:test dt4
   (5am:is-true 
