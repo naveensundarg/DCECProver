@@ -7,14 +7,27 @@
     ((or
       (list 'common _ _)
       (list 'knows _ _ _) 
+      (list 'sees _ _ _)
       (list 'believes _ _ _)) t)
     (_ nil)))
 
+(defun connective (F) (first F))
 (defun shadow-formula (formula)
   "Converts a modal formula to its propositional shadow."
   (if (is-modal? formula)  
       (intern (princ-to-string formula))
-      formula))
+      (optima:match formula 
+        ((list (or 'and 'or 'implies 'iff) P1 P2)
+         (list (connective formula)
+               (shadow-formula P1)
+               (shadow-formula P2)))
+        ((list 'not P)
+         (list 'not
+               (shadow-formula P)))
+        ((list (or 'forall 'exists) vars P)
+         (list (quantifier formula) vars
+               (shadow-formula P)))
+        (_ formula))))
 
 (defun shadow-all (Formulae)
   (mapcar (lambda (formula) (shadow-formula formula)) 

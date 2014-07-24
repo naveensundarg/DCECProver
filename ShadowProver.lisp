@@ -2,21 +2,25 @@
 
 (in-package #:shadowprover)
 
-(defun declare-sorts ()
+(defun declare-default-sorts ()
+  (snark:declare-sort 'Object)
+  (snark:declare-sort 'Action)
+  (snark:declare-sort 'ActionType)
+  (snark:declare-sort 'ActionType)
+  (snark:declare-subsort 'Fluent))
   (snark:declare-sort 'Agent)
   (snark:declare-subsort 'Moment 'Number)
-  (snark:declare-subsort 'Fluent))
 
 
-(defun declare-functors ())
+(defun declare-default-functors ())
 
 
 (defun true? (x) (prove-from-axioms nil x))
 (defun false? (x) (prove-from-axioms nil `(not ,x)))
 
-(defun declare-all-sorts-and-functors ()
-  (declare-sorts)
-  (declare-functors))
+(defun declare-all-sorts-and-functors (sort-decls)
+  (declare-default-sorts)
+  (declare-default-functors))
 
 (defun apply-rule (rule &rest args)
   (case rule
@@ -53,10 +57,11 @@
   (format t "Total Premises: ~a | Formula: ~a | Caller: ~a ~%" (length
                                                                 Premises)
           Formula caller))
-
-(defun prove (Premises Formula &key (proof-stack nil) (caller nil))
+(defparameter *sorts* nil)2
+(defun prove (Premises Formula &key   (proof-stack nil) (caller nil))
   (if *debug* (debug-prove Premises Formula caller))
-  (if (prove-from-axioms (shadow-all Premises) formula :time-limit 2 :verbose nil) 
+  (if (prove-from-axioms (shadow-all Premises) formula :time-limit 2 :verbose
+                         nil ) 
        (add-to-proof-stack proof-stack :FOL Formula) 
       (forward Premises Formula proof-stack)))
 
@@ -64,3 +69,4 @@
 
 ;;; show code
 
+(defun )
