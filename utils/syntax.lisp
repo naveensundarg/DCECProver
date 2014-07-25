@@ -23,14 +23,13 @@
 (defun shadow-formula (formula)
   "Converts a modal formula to its propositional shadow."
   (if (is-modal? formula)  
-      (let ((shadow (intern (make-name formula))))
+      (let ((shadow (make-symbol (make-name formula))))
         (setf *shadows* (cons shadow *shadows*))
         shadow)
       (optima:match formula 
-        ((list (or 'and 'or 'implies 'iff) P1 P2)
-         (list (connective formula)
-               (shadow-formula P1)
-               (shadow-formula P2)))
+        ((cons (or 'and 'or 'implies 'iff) args)
+         (cons (connective formula)
+               (mapcar #'shadow-formula args)))
         ((list 'not P)
          (list 'not
                (shadow-formula P)))

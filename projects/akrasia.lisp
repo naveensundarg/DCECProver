@@ -59,6 +59,19 @@
    *KB-rs* 
    *DCEC*))
 
+(sorts:declare-signature 
+ *signature*
+ (:name S :output agent :inputs nil)
+ (:name I :output agent :inputs nil)
+ (:name damaged :output fluent :inputs (agent))
+ (:name kick :output actiontype :inputs (agent))
+ (:name harm :output actiontype :inputs (agent))
+ (:name initiates :output boolean :inputs (action fluent moment))
+ (:name happens :output boolean :inputs (action moment))
+ (:name holds :output boolean :inputs (fluent moment))
+ (:name tp :output moment :inputs nil)
+ (:name tf :output moment :inputs nil)
+ (:name now :output moment :inputs nil))
 
 (5am:test D2
   (5am:is-true

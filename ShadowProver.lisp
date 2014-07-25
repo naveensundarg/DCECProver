@@ -52,11 +52,13 @@
                handle-DR5
                handle-DR6
                handle-DR9
+               handle-DR12
                handle-R4
                handle-and-elim
                handle-implies-elim
                introduce-theorems
                handle-or-elim
+               handle-univ-elim
                handle-reductio))))
 
  
@@ -88,22 +90,29 @@
       (if found (make-instance 'proof :search-history found)))))
 
 
+(defun shadow-prover (Premises Formula &key 
+                                 sortal-fn
+                                 (proof-stack nil) (caller nil))
+    (multiple-value-bind (shadowed shadows) 
+        (shadow-all (cons Formula Premises))
+      (let ((sortal-setup   
+             (concatfn sortal-fn 
+                       (lambda () 
+                         (mapcar (lambda (s) (apply #'snark:declare-relation
+                                 s))
+                                 (make-shadow-declarations shadows))))))
+        (prove-from-axioms (rest shadowed) (first shadowed) 
+                              :time-limit 2 
+                              :verbose nil :sortal-setup-fn sortal-setup))))
+
 (defun prove! (Premises Formula &key 
                                  sortal-fn
                                   
                                  (proof-stack nil) (caller nil))
   (if *debug* (debug-prove Premises Formula caller))
-  (if  (multiple-value-bind (shadowed shadows) 
-           (shadow-all (cons Formula Premises))
-         (let ((sortal-setup   
-                (concatfn sortal-fn 
-                          (lambda () 
-                            (mapcar (lambda (s) (apply #'snark:declare-relation
-                                 s))
-                                    (make-shadow-declarations shadows))))))
-           (prove-from-axioms (rest shadowed) (first shadowed) 
-                              :time-limit 2 
-                              :verbose nil :sortal-setup-fn sortal-setup))) 
+  (if  (shadow-prover Premises Formula
+                      :sortal-fn sortal-fn :proof-stack
+  proof-stack :caller caller)
        (add-to-proof-stack proof-stack :FOL Formula) 
        (forward Premises Formula sortal-fn proof-stack )))
 

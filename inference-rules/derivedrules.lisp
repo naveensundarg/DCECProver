@@ -62,6 +62,39 @@
                                       (princ-to-string (first fresh))))
                  :caller 'handle-DR9)))))
 
+
+(defun unused-univ-elim-terms (Premises Formula)
+(filter (lambda (Univ-Term)
+                   (let ((U (first Univ-Term))
+                         (term (second Univ-Term)))
+                       (and (universal? U)
+                            (matches? (first (var-sorts (vars U)))
+                                      (sorts:get-sort term *signature*))
+                            (not (elem (specialize U term)
+                                       Premises)))))
+                 (cartesian-product (list premises 
+                                          (terms* (cons Formula Premises))))))
+
+(defun handle-univ-elim (Premises Formula sortal-fn proof-stack)
+  (let ((fresh
+         (unused-univ-elim-terms Premises Formula)))
+     (if fresh 
+        (let ((derived (optima:match (first fresh)
+                         ((list F term) 
+                          (specialize F term)))))
+          (prove! (cons derived premises)
+                 formula
+                 :sortal-fn sortal-fn
+                 :proof-stack 
+                 (add-to-proof-stack proof-stack 
+                                     :D9 
+                                     derived 
+                                     (list
+                                      (princ-to-string (first fresh))))
+                 :caller 'handle-DR9)))))
+
+
+
 (define-type-1-expander handle-DR3 nil
   P (list 'common _ P))
 
@@ -91,3 +124,6 @@
 
 
  
+(define-type-1-expander handle-DR12 nil 
+  (list 'knows (list 'knows a time P)) 
+  (list 'knows (list 'believes a time P)))
