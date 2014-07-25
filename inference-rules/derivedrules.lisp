@@ -30,6 +30,7 @@
 (filter (lambda (Knows-Term)
                    (let ((K (first Knows-Term))
                          (term (second Knows-Term)))
+                     ;(print Knows-Term)
                        (and (knowledge? K) 
                             (universal? (modal-F K))
                             (matches? (first (var-sorts (vars (modal-F K))))
@@ -84,6 +85,9 @@
   (list 'knows a time P2) 
   (list 'knows a time (list 'implies _ P2))
   (list 'knows _ _ _)) 
+
+
+ 
 
 
  

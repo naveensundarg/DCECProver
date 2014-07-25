@@ -2,3 +2,5 @@
 (make-snark-system)
 (push "/Users/naveen/work/ShadowProver/" asdf:*central-registry*)
 (asdf:load-system :shadowprover)
+
+
