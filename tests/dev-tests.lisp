@@ -37,7 +37,6 @@
 (5am:test dt6
   (5am:is-true
    (prove (list 
-           
            '(and P (knows a now Q)))
           'Q)))
 

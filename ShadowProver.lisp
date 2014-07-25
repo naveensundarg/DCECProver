@@ -2,7 +2,10 @@
 
 (in-package #:shadowprover)
 
-
+(defclass proof ()
+  ((search-history :accessor search-history
+         :initform 'search-history
+         :initarg :search-history)))
 (defun declare-default-sorts ()
   (snark:declare-sort 'Object)
   (snark:declare-sort 'snark::Action)
@@ -81,7 +84,8 @@
                                                 subsorts
                                                 functions
                                                 relations)))
-    (prove! Premises Formula :sortal-fn sortal-fn)))
+    (let ((found  (prove! Premises Formula :sortal-fn sortal-fn)))
+      (if found (make-instance 'proof :search-history found)))))
 
 
 (defun prove! (Premises Formula &key 
