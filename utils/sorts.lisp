@@ -1,5 +1,5 @@
 
-(in-package :sort)
+(in-package :sorts)
 
 (defun create-signature () ())
 (defun add-to-signature (signature &key name output (inputs nil))
@@ -80,7 +80,25 @@
             (apply #'add-to-signature (cons signature decl)))
           decls :initial-value (create-signature)))
 
-;;;; example from our IACAP paper
+(defun args (term) (if (listp term) (rest term) nil))
+(defun functor (term) (if (atom term) term (first term)))
+
+(defun type-check (term signature)
+  (and (every (lambda (arg) (type-check arg signature)) (args term))
+   (equalp (get-input-sort term signature) 
+           (mapcar (lambda (a) (get-sort a signature)) (args term)))))
+
+(defun get-sort (term signature)
+  (outputs (find term signature :test 
+                 (lambda (x y) (equalp 
+                                (functor x) (name y))))))
+
+(defun get-input-sort (term signature)
+  (inputs (find term signature :test 
+                 (lambda (x y) (equalp 
+                                (functor x) (name y))))))
+ 
+;;;; [=|(=[=]=)|=] example from our IACAP paper
 (sorts:declare-signature 
  *prob-1-sig*	  
  (:name S :output agent :inputs nil)
@@ -93,3 +111,5 @@
  (:name holds :output boolean :inputs (fluent moment))
  (:name tp :output moment :inputs nil)
  (:name now :output moment :inputs nil))
+
+(get-sort '(kick I)  *prob-1-sig*)

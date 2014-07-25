@@ -6,12 +6,12 @@
   (:use #:cl)
   (:export  #:!@ :consistent? :prove-from-axioms))
 
-(defpackage #:enumerations 
+(defpackage #:sorts-system 
   (:documentation "Enumerating all terms of a certain depth given signature.")
-  (:nicknames :enums)
+  (:nicknames :sorts)
   (:use #:cl)
-  (:export :declare-signature :generate))
+  (:export :declare-signature :get-sort :generate))
 
 (defpackage #:shadowprover
-  (:use #:cl #:optima #:enumerations #:snark-interface))
+  (:use #:cl #:optima #:sorts #:snark-interface))
 

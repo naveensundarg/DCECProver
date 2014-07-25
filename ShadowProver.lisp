@@ -5,11 +5,11 @@
 
 (defun declare-default-sorts ()
   (snark:declare-sort 'Object)
-  (snark:declare-sort 'Action)
-  (snark:declare-sort 'ActionType)
-  (snark:declare-sort 'Fluent)
-  (snark:declare-sort 'Agent)
-  (snark:declare-subsort 'Moment 'Number))
+  (snark:declare-sort 'snark::Action)
+  (snark:declare-sort 'snark::ActionType)
+  (snark:declare-sort 'snark::Fluent)
+  (snark:declare-sort 'snark::Agent)
+  (snark:declare-subsort 'snark::Moment 'snark::Number))
 
 
 (defun declare-default-functors ())
@@ -90,14 +90,14 @@
                                  (proof-stack nil) (caller nil))
   (if *debug* (debug-prove Premises Formula caller))
   (if  (multiple-value-bind (shadowed shadows) 
-           (shadow-all Premises)
+           (shadow-all (cons Formula Premises))
          (let ((sortal-setup   
                 (concatfn sortal-fn 
                           (lambda () 
                             (mapcar (lambda (s) (apply #'snark:declare-relation
                                  s))
                                     (make-shadow-declarations shadows))))))
-           (prove-from-axioms shadowed formula 
+           (prove-from-axioms (rest shadowed) (first shadowed) 
                               :time-limit 2 
                               :verbose nil :sortal-setup-fn sortal-setup))) 
        (add-to-proof-stack proof-stack :FOL Formula) 

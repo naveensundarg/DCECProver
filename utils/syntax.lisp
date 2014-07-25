@@ -14,10 +14,16 @@
 (defun connective (F) (first F))
 (defparameter *shadows* nil)
 
+(defun make-name (formula)
+  (cl-ppcre:regex-replace-all "[\\\s]"
+   (cl-ppcre:regex-replace-all  
+    "[)]" 
+    (cl-ppcre:regex-replace-all  "[(]" (princ-to-string formula) "")
+    "") ""))
 (defun shadow-formula (formula)
   "Converts a modal formula to its propositional shadow."
   (if (is-modal? formula)  
-      (let ((shadow (intern (princ-to-string formula))))
+      (let ((shadow (intern (make-name formula))))
         (setf *shadows* (cons shadow *shadows*))
         shadow)
       (optima:match formula 
@@ -136,7 +142,16 @@
   (if (atom f)
       (list f)
       (cons f (reduce #'append (mapcar #'subs (rest f))))))
+(defun sorted? (F) 
+  (optima:match F
+    ((list (or 'forall 'exists) vars _) 
+     (some (lambda (s) (listp s)) vars))))
+(defun var-sorts (vars) 
+  (mapcar (lambda (s) (second s)) vars))
 
+
+(defun strip-away-sorts (vars) 
+  (mapcar (lambda (s) (if (atom s) s (first s))) vars))
 (defun terms (formula)
   (labels ((handle-complex-vs-atom (P)
              (if (compound-F? P) 
@@ -158,7 +173,7 @@
              ((list 'not P) 
               (handle-complex-vs-atom P))
              ((list (or 'forall 'exists) vars P) 
-              (set-difference (handle-complex-vs-atom P) vars :test #'equalp))
+              (set-difference (handle-complex-vs-atom P) (strip-away-sorts vars) :test #'equalp))
              ((guard x (compound? x)) 
               (reduce #'append (mapcar #'subs (rest x))))
              ((guard x (atom x)) (handle-complex-vs-atom x)))))
@@ -184,16 +199,22 @@
 
 (defun top-var (quantifiedF)
   (optima:match quantifiedF 
-    ((list (or 'forall 'exists) vars _) (first vars))))
+    ((list (or 'forall 'exists) vars _) 
+     (if (atom (first vars))
+         (first vars)
+         (first (first vars))))))
 
 (defun rest-vars (quantifiedF)
   (optima:match quantifiedF 
     ((list 'forall vars _) (rest vars))
     ((list 'exists vars _) (rest vars))))
 
+(defun vars (quantifiedF)
+  (optima:match quantifiedF 
+    ((list (or 'exists'forall) vars _) vars)))
 (defun specialize (Univ term)
   (if (rest-vars Univ)
       (list (quantifier Univ ) 
             (rest-vars Univ) 
             (subst term  (top-var Univ) (kernel Univ)))
-      (subst term  (top-var Univ) (kernel Univ))))
+      (subst term (top-var Univ) (kernel Univ))))

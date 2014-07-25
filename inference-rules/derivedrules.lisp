@@ -25,13 +25,15 @@
                                       (princ-to-string (first fresh))))
                  :caller 'handle-DR2)))))
 
-
+(defun matches? (x y) (equalp x y))
 (defun unused-DR9-terms (Premises Formula)
 (filter (lambda (Knows-Term)
                    (let ((K (first Knows-Term))
                          (term (second Knows-Term)))
                        (and (knowledge? K) 
                             (universal? (modal-F K))
+                            (matches? (first (var-sorts (vars (modal-F K))))
+                                      (sorts:get-sort term *signature*))
                             (not (elem `(knows 
                                          ,(modal-agent K)
                                          ,(modal-time K)
@@ -39,7 +41,6 @@
                                        Premises)))))
                  (cartesian-product (list premises 
                                           (terms* (cons Formula Premises))))))
-
 
 (defun handle-DR9 (Premises Formula sortal-fn proof-stack)
   (let ((fresh

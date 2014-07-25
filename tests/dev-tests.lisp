@@ -103,5 +103,5 @@
 
 (5am:test dt15
   (5am:is-true
-   (prove (list '(knows b now (knows a t (forall (x) (P x)))))
+   (prove (list '(knows b now (knows a t (forall ((?x Agent)) (P ?x)))))
           '(P (f c)))))
