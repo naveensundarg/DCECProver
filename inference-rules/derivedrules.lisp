@@ -1,6 +1,34 @@
 (in-package #:shadowprover)
 
 
+(defun handle-DR1 (Premises Formula sortal-fn proof-stack)
+  (let ((fresh
+         (filter (lambda (CommonK-Agent)
+                   (let ((C (first CommonK-Agent))
+                         (a1 (first (second CommonK-Agent)))
+                         (a2 (second (second CommonK-Agent))))
+                       (and (common-knowledge? C) 
+                            (not (elem `(knows ,a1 ,(modal-time (first CommonK-Agent))
+                                               (knows ,a2 ,(modal-time (first CommonK-Agent))
+                                                      ,(modal-F (first CommonK-Agent))))
+                                       Premises)))))
+                 (cartesian-product (list premises  
+                                          (cartesian-power (agents* (cons Formula Premises)) 2))))))
+    (if fresh 
+        (let ((derived (optima:match (first fresh)
+                         ((list (list 'common time F) agent) 
+                          `(knows ,(first  agent) ,time
+                                  (knows ,(second  agent) ,time ,F))))))
+          (prove! (cons derived premises)
+                 formula
+                 :sortal-fn sortal-fn
+                 :proof-stack 
+                 (add-to-proof-stack proof-stack 
+                                     :DR2 
+                                     derived 
+                                     (list
+                                      (princ-to-string (first fresh))))
+                 :caller 'handle-DR1)))))
 (defun handle-DR2 (Premises Formula sortal-fn proof-stack)
   (let ((fresh
          (filter (lambda (CommonK-Agent)
@@ -118,12 +146,7 @@
   (list 'knows a time P2) 
   (list 'knows a time (list 'implies _ P2))
   (list 'knows _ _ _)) 
-
-
- 
-
-
  
 (define-type-1-expander handle-DR12 nil 
-  (list 'knows (list 'knows a time P)) 
-  (list 'knows (list 'believes a time P)))
+  (list 'believes a1 time  (list 'believes a2 time P)) 
+  (list 'believes a1 time (list 'knows a2 _ P)))

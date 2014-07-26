@@ -46,7 +46,7 @@
     (try 
      (lambda (fn) (funcall fn Premises Formula sortal-fn proof-stack))
      (mapcar #'symbol-function 
-             '(handle-DR2 
+             '( handle-DR2 
                handle-DR3
                handle-DR4
                handle-DR5
@@ -59,7 +59,8 @@
                introduce-theorems
                handle-or-elim
                handle-univ-elim
-               handle-reductio))))
+               handle-reductio
+               handle-DR1))))
 
  
 

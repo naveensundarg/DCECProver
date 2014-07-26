@@ -27,6 +27,14 @@
                  (knows ?a ?t (happens (action ?a ?d) ?t))))))
 
 
+(defparameter *A5*
+  '(Common now (forall ((?a Agent) (?f Fluent) (?t Moment) (?t1 Moment))
+            (and 
+             (believes ?a now (holds ?f ?t))
+             (believes ?a now (< ?t ?t1))
+             (implies (believes ?a now (not (clipped ?t ?f ?t1)))
+                      (believes ?a now (holds ?f ?t1)))))))
+
 (defparameter *A6*
   '(forall ((?a Agent) (?b Agent) (?t1 Moment) (?t2 Moment) (?f Fluent))
     (implies 
@@ -39,10 +47,12 @@
      (believes ?a now (not (believes ?b now (clipped ?t1 ?f ?t2)))))))
 
 
-(defparameter *M2-P2*
+(defparameter *M3-P1*
+  '(Common now (< t1 t2)))
+(defparameter *M3-P2*
   '(knows a1 a2 (holds f t1)))
 
-(defparameter *M2-P3*
+(defparameter *M3-P3*
   '(and 
    (believes a1 now (believes a2 now (holds ?f ?t1))) 
    (believes a1 now (not (exists ((?e event) (?t moment)) 
@@ -76,12 +86,12 @@
    (prove (list *M1-p1* *A4* )
           '(knows a1 now (knows a2 t (happens (action a2 alpha) t))))))
 
-(5am:test M2-2
+(5am:test M3-2
   (5am:is-true
-   (prove (list *M2-P2*)
+   (prove (list *M3-P2*)
 		     '(knows a1 a2 (holds f t1)))))
 
-(5am:test M2-3
+(5am:test M3-3
   (5am:is-true 
    (prove (list *A6*)
           '(implies 
@@ -97,5 +107,31 @@
 
 (5am:test M3-4
   (5am:is-true
-   (prove (list *A6* *M2-P2* *M2-P3*)
+   (prove (list *A6* *M3-P2* *M3-P3*)
           '(believes a1 now (not (believes a2 now (clipped ?t1 ?f ?t2)))))))
+
+
+(5am:test M3-5
+  (5am:is-true
+   (prove (list *A5*)
+          '(knows a1 now (forall ((?a Agent) (?f Fluent) (?t Moment) (?t1 Moment))
+                          (and 
+                           (believes ?a now (holds ?f ?t))
+                           (believes ?a now (< ?t ?t1))
+                           (implies (believes ?a now (not (clipped ?t ?f ?t1)))
+                                    (believes ?a now (holds ?f ?t1)))))))))
+
+(5am:test M3-6
+  (5am:is-true
+   (prove (list *A5*)
+		     '(and 
+		       (believes ?a now (holds ?f ?t))
+		       (believes ?a now (< ?t ?t1))
+		       (implies (believes ?a now (not (clipped ?t ?f ?t1)))
+                                    (believes ?a now (holds ?f ?t1)))))))
+
+
+(5am:test M3-7
+  (5am:is-true
+   (prove (list *M3-P1*)
+		     '(believes a1 now (believes a2 now (< t1 t2))))))
