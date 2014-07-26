@@ -57,6 +57,11 @@
     ((list 'knows _ _ _) t) 
     (_ nil)))
 
+(defun belief? (formula) 
+  (optima:match formula
+    ((list 'believes _ _ _) t) 
+    (_ nil)))
+
 (defun and? (formula) 
   (optima:match formula
     ((list 'and _ _) t) 

@@ -43,24 +43,25 @@
     (otherwise (error "~ unimplemented rule." rule))))
 
 (defun forward (Premises Formula sortal-fn &optional (proof-stack nil))
-    (try 
-     (lambda (fn) (funcall fn Premises Formula sortal-fn proof-stack))
-     (mapcar #'symbol-function 
-             '( handle-DR2 
-               handle-DR3
-               handle-DR4
-               handle-DR5
-               handle-DR6
-               handle-DR9
-               handle-DR12
-               handle-R4
-               handle-and-elim
-               handle-implies-elim
-               introduce-theorems
-               handle-or-elim
-               handle-univ-elim
-               handle-reductio
-               handle-DR1))))
+    
+  (setf *modal-counts* (+ *modal-counts* 1)) (try 
+      (lambda (fn) (funcall fn Premises Formula sortal-fn proof-stack))
+      (mapcar #'symbol-function 
+              '( handle-DR2 
+                handle-DR3
+                handle-DR4
+                handle-DR5
+                handle-DR6
+                handle-DR9
+                handle-DR12
+                handle-R4
+                handle-and-elim
+                handle-implies-elim
+                introduce-theorems
+                handle-or-elim
+                handle-univ-elim
+                handle-reductio
+                handle-DR1))))
 
  
 
@@ -77,6 +78,9 @@
 (defun concatfn (f g) (lambda () (if f (funcall f)) (if g (funcall g))))
 
 
+(defparameter *fol-counts* 0)
+(defparameter *modal-counts* 0)
+
 (defun prove (Premises Formula &key 
                                  (sorts nil) 
                                  (subsorts nil)
@@ -87,13 +91,18 @@
                                                 subsorts
                                                 functions
                                                 relations)))
-    (let ((found  (prove! Premises Formula :sortal-fn sortal-fn)))
+    (let ( 
+           
+          (start-time (get-internal-real-time))
+          (found  (prove! Premises Formula :sortal-fn sortal-fn))
+          (end-time (get-internal-real-time)))
       (if found (make-instance 'proof :search-history found)))))
 
 
 (defun shadow-prover (Premises Formula &key 
                                  sortal-fn
                                  (proof-stack nil) (caller nil))
+  (setf *fol-counts*  (+ 1 *fol-counts*))
     (multiple-value-bind (shadowed shadows) 
         (shadow-all (cons Formula Premises))
       (let ((sortal-setup   
@@ -111,9 +120,9 @@
                                   
                                  (proof-stack nil) (caller nil))
   (if *debug* (debug-prove Premises Formula caller))
-  (if  (shadow-prover Premises Formula
+  (if (shadow-prover Premises Formula
                       :sortal-fn sortal-fn :proof-stack
-  proof-stack :caller caller)
+                      proof-stack :caller caller)
        (add-to-proof-stack proof-stack :FOL Formula) 
        (forward Premises Formula sortal-fn proof-stack )))
 

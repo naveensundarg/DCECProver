@@ -3,6 +3,22 @@
 (in-package  :snark-interface)
  
 ;;(cl::make-snark-system)
+
+(defun snark-verbose ()
+  (snark:print-options-when-starting  nil)
+  (snark:print-agenda-when-finished nil)
+  (snark:print-clocks-when-finished t)
+  (snark:print-final-rows nil)
+  (snark:print-symbol-table-warnings nil)
+  (snark:print-summary-when-finished t)
+  (snark:print-row-answers nil)
+  (snark:print-row-goals nil) 
+  (snark:print-rows-when-derived nil)
+  (snark:print-row-reasons nil)
+  (snark:print-row-partitions nil)
+  (snark:print-rows-prettily nil)
+  (snark:print-rows :min 0 :max 0))
+
 (defun snark-deverbose ()
   (snark:print-options-when-starting  nil)
   (snark:print-agenda-when-finished nil)
@@ -20,7 +36,7 @@
 
 (defun setup-snark (&key (time-limit 5) (verbose nil))
   (snark:initialize :verbose  verbose)
-  (if (not verbose) (snark-deverbose))
+  (if (not verbose) (snark-deverbose) )
   (snark:run-time-limit time-limit)
   (snark:assert-supported t)
   (snark:assume-supported t)

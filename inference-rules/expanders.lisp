@@ -9,7 +9,8 @@
                     (optima:match formula
                       (,(cons 'list in) (if (elem ,out premises) nil t))))
                   (let ((premises^n (cartesian-power premises ,(length in))))
-                    (if ,constraint (filter ,constraint premises^n) 
+                    (if ,constraint (filter (lambda (premises-tuple) 
+                                              (apply ,constraint premises-tuple)) premises^n) 
                         premises^n))))) 
       (if fresh 
           (let ((derived (optima:match (first fresh)

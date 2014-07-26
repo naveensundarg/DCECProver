@@ -76,7 +76,7 @@
 
 (defun handle-reductio (Premises Formula sortal-fn proof-stack)
   (let* ((absurd '(and p  (not p)))
-         (meaningful?  (not (false? Formula)))
+         (meaningful?  (not (false? (shadow-formula Formula))))
          (reductio (if meaningful? (prove! (cons `(not ,Formula) Premises) 
                                           absurd 
                                           :sortal-fn sortal-fn
