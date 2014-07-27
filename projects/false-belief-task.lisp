@@ -35,7 +35,7 @@
                  (and 
                   (believes ?a now (holds ?f ?t))
                   (believes ?a now (< ?t ?t1))
-                  (believes ?a now (not (clipped ?t ?f ?t1))))
+                  (not (believes ?a now  (clipped ?t ?f ?t1))))
                  (believes ?a now (holds ?f ?t1))))))
 
 (defparameter *A6*
@@ -120,7 +120,7 @@
                           (implies 
                            (and (believes ?a now (holds ?f ?t))
                                 (believes ?a now (< ?t ?t1))
-                                (believes ?a now (not (clipped ?t ?f ?t1))))
+                                (not (believes ?a now  (clipped ?t ?f ?t1))))
                            (believes ?a now (holds ?f ?t1))))))))
 
 (5am:test M3-6
@@ -128,9 +128,10 @@
    (prove (list *A5*)
           '(believes a1 now
              (implies 
-              (and (believes a2 now (holds f t1))
-                   (believes a2 now (< t1 t2))
-                   (believes a2 now (not (clipped t1 f t2))))
+              (and 
+               (believes a2 now (holds f t1))
+               (believes a2 now (< t1 t2))
+               (not (believes a2 now  (clipped t1 f t2))))
               (believes a2 now (holds f t2)))))))
 
 
@@ -140,14 +141,17 @@
           '(believes a1 now (believes a2 now (< t1 t2))))))
 
 
-;; (5am:test M3-8
-;;   (5am:is-true
-;;    (prove (list '(and 
-;; 		       (believes ?a now (holds ?f ?t))
-;; 		       (believes ?a now (< ?t ?t1))
-;; 		       (implies (believes ?a now (not (clipped ?t ?f ?t1)))
-;;                                     (believes ?a now (holds ?f ?t1))))
-;;                 '(knows a1 a2 (holds f t1))
-;;                 '(believes a1 now (believes a2 now (< t1 t2)))
-;;                 '(believes a1 now (not (believes a2 now (clipped ?t1 ?f ?t2)))))
-;;           '(believes a1 now (believes a2 now (holds ?f t2))))))
+(5am:test M3-8
+  (5am:is-true
+   (prove (list  
+           '(believes a1 now
+             (implies 
+              (and 
+               (believes a2 now (holds f t1))
+               (believes a2 now (< t1 t2))
+               (not (believes a2 now  (clipped t1 f t2))))
+              (believes a2 now (holds f t2))))
+           '(believes a1 now (believes a2 now (holds f t1)))
+           '(believes a1 now (believes a2 now (< t1 t2)))
+           '(believes a1 now (not (believes a2 now (clipped t1 f t2)))))
+          '(believes a1 now (believes a2 now (holds f t2))))))

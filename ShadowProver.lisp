@@ -12,7 +12,7 @@
   (snark:declare-sort 'snark::ActionType)
   (snark:declare-sort 'snark::Fluent)
   (snark:declare-sort 'snark::Agent)
-  (snark:declare-subsort 'snark::Moment 'snark::Number))
+  (snark:declare-sort 'snark::Moment))
 
 
 (defun declare-default-functors ())
@@ -47,13 +47,14 @@
   (setf *modal-counts* (+ *modal-counts* 1)) (try 
       (lambda (fn) (funcall fn Premises Formula sortal-fn proof-stack))
       (mapcar #'symbol-function 
-              '( handle-DR2 
+              '(handle-DR2 
                 handle-DR3
                 handle-DR4
                 handle-DR5
                 handle-DR6
                 handle-DR9
                 handle-DR12
+                handle-DR19
                 handle-R4
                 handle-and-elim
                 handle-implies-elim
