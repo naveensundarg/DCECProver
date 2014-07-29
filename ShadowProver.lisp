@@ -2,14 +2,22 @@
 
 (in-package #:shadowprover)
 
+(defparameter *tackled-implies* nil)
+(defparameter *fol-counts* 0)
+(defparameter *modal-counts* 0)
+(defparameter *interactive* nil)
+(defparameter *line-number* 1)
+
+
 (defclass proof ()
   ((search-history :accessor search-history
          :initform 'search-history
          :initarg :search-history)))
 (defun declare-default-sorts ()
-  (snark:declare-sort 'Object)
+  (snark:declare-sort 'snark::Obj)
   (snark:declare-sort 'snark::Action)
   (snark:declare-sort 'snark::ActionType)
+  (snark:declare-sort 'snark::Object)
   (snark:declare-sort 'snark::Fluent)
   (snark:declare-sort 'snark::Agent)
   (snark:declare-sort 'snark::Moment))
@@ -42,15 +50,17 @@
              `(knows ,a ,time ,(consequent F)))))
     (otherwise (error "~ unimplemented rule." rule))))
 
+
 (defun forward (Premises Formula sortal-fn &optional (proof-stack nil))
     
   (setf *modal-counts* (+ *modal-counts* 1)) (try 
-      (lambda (fn) (funcall fn Premises Formula sortal-fn proof-stack))
+      (lambda (fn) 
+          (funcall fn Premises Formula sortal-fn proof-stack))
       (mapcar #'symbol-function 
               '(handle-DR2 
                 handle-DR3
                 handle-DR4
-                handle-DR5
+               handle-DR5
                 handle-DR6
                 handle-DR9
                 handle-DR12
@@ -58,7 +68,7 @@
                 handle-R4
                 handle-and-elim
                 handle-implies-elim
-                introduce-theorems
+                handle-implies-deeper
                 handle-or-elim
                 handle-univ-elim
                 handle-reductio
@@ -79,8 +89,6 @@
 (defun concatfn (f g) (lambda () (if f (funcall f)) (if g (funcall g))))
 
 
-(defparameter *fol-counts* 0)
-(defparameter *modal-counts* 0)
 
 (defun prove (Premises Formula &key 
                                  (sorts nil) 
@@ -88,7 +96,9 @@
                                  (functions nil)
                                  (relations nil)
                                  (proof-stack nil) (caller nil))
-  (let ((sortal-fn (declarer-sorts-and-functors sorts
+  (let ((*line-number* 0)
+        (*tackled-implies* nil)
+        (sortal-fn (declarer-sorts-and-functors sorts
                                                 subsorts
                                                 functions
                                                 relations)))
@@ -113,19 +123,42 @@
                                  s))
                                  (make-shadow-declarations shadows))))))
         (prove-from-axioms (rest shadowed) (first shadowed) 
-                              :time-limit 2 
+                              :time-limit 0.1
                               :verbose nil :sortal-setup-fn sortal-setup))))
+(defun str* (base n) 
+  (let ((str "")) 
+    (loop for i from 1 to n do 
+	 (setf str (concatenate 'string str base)))
+    str))
+
+
+(defun prompt-read (prompt)
+  (format *query-io* "~a: " prompt)
+  (force-output *query-io*)
+  (read-line *query-io*))
+
+(defun interactive-interface (info)
+  (incf *line-number*)
+  (let ((command (PRINT 
+		  (concatenate 'string 
+			       (princ-to-string *line-number*) 
+			       ":"
+                               (princ-to-string info)))))))
+
+
 
 (defun prove! (Premises Formula &key 
                                  sortal-fn
                                   
                                  (proof-stack nil) (caller nil))
-  (if *debug* (debug-prove Premises Formula caller))
+  (if *interactive* 
+      (interactive-interface caller))
+
   (if (shadow-prover Premises Formula
-                      :sortal-fn sortal-fn :proof-stack
-                      proof-stack :caller caller)
-       (add-to-proof-stack proof-stack :FOL Formula) 
-       (forward Premises Formula sortal-fn proof-stack )))
+                       :sortal-fn sortal-fn :proof-stack
+                       proof-stack :caller caller)
+      (add-to-proof-stack proof-stack :FOL Formula) 
+      (forward Premises Formula sortal-fn proof-stack )))
 
 
 

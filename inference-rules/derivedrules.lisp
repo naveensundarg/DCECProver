@@ -28,7 +28,7 @@
                                      derived 
                                      (list
                                       (princ-to-string (first fresh))))
-                 :caller 'handle-DR1)))))
+                 :caller (list 'handle-DR1 :got derived))))))
 (defun handle-DR2 (Premises Formula sortal-fn proof-stack)
   (let ((fresh
          (filter (lambda (CommonK-Agent)
@@ -51,7 +51,7 @@
                                      derived 
                                      (list
                                       (princ-to-string (first fresh))))
-                 :caller 'handle-DR2)))))
+                 :caller (list 'handle-DR2 :got derived))))))
 
 (defun matches? (x y) (equalp x y))
 (defun unused-DR9-terms (Premises Formula)
@@ -88,7 +88,7 @@
                                      derived 
                                      (list
                                       (princ-to-string (first fresh))))
-                 :caller 'handle-DR9)))))
+                 :caller (list 'handle-DR9 :got derived))))))
 
 
 (defun unused-univ-elim-terms (Premises Formula)
@@ -107,7 +107,7 @@
   (let ((fresh
          (unused-univ-elim-terms Premises Formula)))
      (if fresh 
-        (let ((derived (optima:match (first fresh)
+        (let ((derived  (optima:match (first fresh)
                          ((list F term) 
                           (specialize F term)))))
           (prove! (cons derived premises)
@@ -119,7 +119,7 @@
                                      derived 
                                      (list
                                       (princ-to-string (first fresh))))
-                 :caller 'handle-DR9)))))
+                 :caller (list 'univ-elim :got derived))))))
 
 
 

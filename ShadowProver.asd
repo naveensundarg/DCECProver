@@ -21,5 +21,6 @@
 
                (:file "shadowprover")
                (:file "./tests/dev-tests")
-               (:file "./projects/akrasia")))
+               (:file "./projects/akrasia/akrasia")
+               (:file "./projects/false-belief-task/false-belief-task")))
 

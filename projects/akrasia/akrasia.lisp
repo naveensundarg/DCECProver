@@ -6,7 +6,6 @@
 (sorts:declare-signature 
  *signature*
  (:name s :output Agent :inputs nil)
- (:name I :output agent :inputs nil)
  (:name damaged :output fluent :inputs (agent))
  (:name kick :output actiontype :inputs (agent))
  (:name harm :output actiontype :inputs (agent))
@@ -14,8 +13,7 @@
  (:name happens :output boolean :inputs (action moment))
  (:name holds :output boolean :inputs (fluent moment))
  (:name tp :output moment :inputs nil)
- (:name tf :output moment :inputs nil)
- (:name now :output moment :inputs nil))
+ (:name tf :output moment :inputs nil))
 
 (defparameter *KB-selfd*
   (list
@@ -41,7 +39,7 @@
                (holds (custody s I*) ?time))))))
 
 (defparameter *KB-rs*
-  (list
+   (list
    '(knows I now (holds (harmed s I*) tp))
    '(forall ((?a Agent) (?time Moment))
          (implies 

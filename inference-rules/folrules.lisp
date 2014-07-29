@@ -34,7 +34,9 @@
          :sortal-fn sortal-fn
          :proof-stack
          (cons `(:implies-elim  ,(list (princ-to-string (first unused-implies-elim-args))))  
-               proof-stack)))))
+               proof-stack)
+         :caller (list 'implies-elim :got
+                       (apply-rule :implies-elim (first unused-implies-elim-args)))))))
 
 
 (defun handle-and-elim (Premises Formula sortal-fn proof-stack)
@@ -50,7 +52,11 @@
          (add-to-proof-stack proof-stack
                              :and-elim
                              (rest (first unused-and-elim-args))
-                             (list (princ-to-string (first unused-and-elim-args))))))))
+                             (list (princ-to-string (first
+  unused-and-elim-args))))
+         :caller  (list 'and-elim :got (append 
+          (apply-rule :and-elim (first unused-and-elim-args))
+          premises))))))
 
 
 (defun handle-or-elim (Premises Formula sortal-fn proof-stack)
@@ -64,11 +70,13 @@
                (left-proof 
                 (prove! (cons left reduced-premises) 
                         Formula :sortal-fn 
-                        sortal-fn :proof-stack proof-stack))
+                        sortal-fn :proof-stack proof-stack
+                        :caller (list :or-elim :sub-left left )))
                (right-proof 
                 (prove! (cons right reduced-premises)
                         Formula :sortal-fn
-                        sortal-fn :proof-stack proof-stack)))
+                        sortal-fn :proof-stack proof-stack
+                        :caller (list :or-elim :sub-right right ))))
           (if (and left-proof right-proof)
               (add-to-proof-stack proof-stack :or-elim Formula (list
   (princ-to-string disjunct)) left-proof right-proof))))))
@@ -77,26 +85,40 @@
 (defun handle-reductio (Premises Formula sortal-fn proof-stack)
   (let* ((absurd '(and p  (not p)))
          (meaningful?  (not (false? (shadow-formula Formula))))
-         (reductio (if meaningful? (prove! (cons `(not ,Formula) Premises) 
-                                          absurd 
-                                          :sortal-fn sortal-fn
-                                          :proof-stack proof-stack
-                                          :caller :reductio))))
+         (reductio (if meaningful?  (prove! (cons `(not ,Formula) Premises) 
+                                                     absurd 
+                                                     :sortal-fn sortal-fn
+                                                     :proof-stack proof-stack
+                                                     ))))
     (if reductio (add-to-proof-stack proof-stack absurd reductio))))
 
 
- 
-(defun introduce-theorems (Premises Formula sortal-fn proof-stack)
-  (let ((fresh (filter #'implies? Premises))) 
-    (if (and fresh (prove! nil (antecedent (first fresh))))  
-        (prove! 
-         (cons 
-          (consequent (first fresh))
-          premises)
-         Formula
-         :sortal-fn sortal-fn
-         :proof-stack 
-         (add-to-proof-stack proof-stack
-                             :implies
-                             (first fresh)
-                             (list (princ-to-string (first fresh))))))))
+
+(defun handle-implies-deeper (Premises Formula sortal-fn proof-stack)
+  (let ((focus (first (filter #'implies? Premises)))) 
+    (if (and
+         focus
+         (not (elem focus *tackled-implies*)))  
+        (progn 
+          (setf *tackled-implies* (cons focus *tackled-implies*))
+          (if (shadow-prover Premises  (antecedent focus) :sortal-fn sortal-fn)
+              (let ((sub-proof (prove! 
+                                (cons 
+                                 (consequent focus)
+                                 premises)
+                                Formula
+                                :sortal-fn sortal-fn
+                                :proof-stack 
+                                (add-to-proof-stack proof-stack
+                                                    :implies
+                                                    focus
+                                                    (list (princ-to-string focus))) 
+                                :caller (list 'introduce-theorems :got focus))))
+                (if sub-proof 
+                    sub-proof
+                    (progn 
+                           (setf *tackled-implies*(remove focus *tackled-implies*))
+                           nil)))
+              (progn 
+                     (setf *tackled-implies*(remove focus *tackled-implies*))
+                     nil))))))

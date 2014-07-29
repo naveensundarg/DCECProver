@@ -7,6 +7,7 @@
     ((or
       (list 'common _ _)
       (list 'knows _ _ _) 
+      (list 'desires _ _ _)             
       (list 'sees _ _ _)
       (list 'believes _ _ _)) t)
     (_ nil)))
@@ -167,13 +168,13 @@
               (append (list agent)
                       (terms agent) 
                       (handle-complex-vs-atom F)))
-             ((list (or 'believes 'knows) agent time F) 
+             ((list (or 'believes 'knows 'desires) agent time F) 
               (append (list agent) (list time)
                       (terms agent) (terms time)
                       (handle-complex-vs-atom F)))
              ((list (or 'and 'or 'implies 'iff) P1 P2) 
-              (append (handle-complex-vs-atom P1)
-                      (handle-complex-vs-atom P2)))
+              (append (terms P1)
+                      (terms P2)))
              ((list 'not P) 
               (handle-complex-vs-atom P))
              ((list (or 'forall 'exists) vars P) 
@@ -184,7 +185,7 @@
       (remove-duplicates terms-with-dupes :test #'equalp))))
 
 (defun terms* (formulae)
-  (reduce #'append (mapcar #'terms formulae)))
+  (remove-duplicates (reduce #'append (mapcar #'terms formulae))))
 
 
 (defun quantifier (quantifiedF)
