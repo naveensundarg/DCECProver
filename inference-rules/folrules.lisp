@@ -53,7 +53,7 @@
                              :and-elim
                              (rest (first unused-and-elim-args))
                              (list (princ-to-string (first
-  unused-and-elim-args))))
+                                                     unused-and-elim-args))))
          :caller  (list 'and-elim :got (append 
           (apply-rule :and-elim (first unused-and-elim-args))
           premises))))))
@@ -81,15 +81,21 @@
               (add-to-proof-stack proof-stack :or-elim Formula (list
   (princ-to-string disjunct)) left-proof right-proof))))))
 
+(defparameter *in-reductio?* nil)
 
 (defun handle-reductio (Premises Formula sortal-fn proof-stack)
+ ; (format t "In Reductio? ~a~%"  *in-reductio?*)
   (let* ((absurd '(and p  (not p)))
-         (meaningful?  (not (false? (shadow-formula Formula))))
-         (reductio (if meaningful?  (prove! (cons `(not ,Formula) Premises) 
-                                                     absurd 
-                                                     :sortal-fn sortal-fn
-                                                     :proof-stack proof-stack
-                                                     ))))
+         (meaningful? 
+           (not (false? (shadow-formula Formula))))
+         (reductio (if (and   meaningful?)
+                       (let ((*in-reductio?* t))
+                        ; (format t "In Reductio? ~a~%"  *in-reductio?*)
+                         (prove! (cons `(not ,Formula) Premises) 
+                                 absurd 
+                                 :sortal-fn sortal-fn
+                                 :proof-stack proof-stack
+                                 :caller (list 'from-reductio Formula))))))
     (if reductio (add-to-proof-stack proof-stack absurd reductio))))
 
 

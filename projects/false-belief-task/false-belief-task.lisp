@@ -67,11 +67,11 @@
                           (implies (happens (action ?a ?d) ?t)
                            (knows ?a ?t (happens (action ?a ?d) ?t))))))))
 
-(5am:test M1-4
-  (5am:is-true (prove (list *A4* )
-                      '(knows a1 now 
-                        (implies (happens (action a2 alpha) t)
-                         (knows a2 t (happens (action a2 alpha) t)))))))
+;; (5am:test M1-4
+;;   (5am:is-true (prove (list *A4* )
+;;                       '(knows a1 now 
+;;                         (implies (happens (action a2 alpha) t)
+;;                          (knows a2 t (happens (action a2 alpha) t)))))))
 
 (5am:test M1-5
   (5am:is-true 

@@ -5,10 +5,12 @@
 (defparameter *tackled-implies* nil)
 (defparameter *fol-counts* 0)
 (defparameter *modal-counts* 0)
-(defparameter *interactive* nil)
+(defparameter *interactive* t)
 (defparameter *line-number* 1)
+(defparameter *snark-verbose* nil)
+(defparameter *expanded* nil)
 
-
+(defparameter *premises* nil)
 (defclass proof ()
   ((search-history :accessor search-history
          :initform 'search-history
@@ -55,16 +57,15 @@
     
   (setf *modal-counts* (+ *modal-counts* 1)) (try 
       (lambda (fn) 
+        (if *debug* (print fn))
           (funcall fn Premises Formula sortal-fn proof-stack))
       (mapcar #'symbol-function 
               '(handle-DR2 
                 handle-DR3
                 handle-DR4
-               handle-DR5
+                handle-DR5
                 handle-DR6
-                handle-DR9
                 handle-DR12
-                handle-DR19
                 handle-R4
                 handle-and-elim
                 handle-implies-elim
@@ -72,7 +73,9 @@
                 handle-or-elim
                 handle-univ-elim
                 handle-reductio
-                handle-DR1))))
+                handle-DR1
+                handle-DR9
+                handle-DR19))))
 
  
 
@@ -90,25 +93,47 @@
 
 
 
-(defun prove (Premises Formula &key 
+(defun prove (Premises Formula  &key 
+                                  (verbose nil)
                                  (sorts nil) 
                                  (subsorts nil)
                                  (functions nil)
                                  (relations nil)
                                  (proof-stack nil) (caller nil))
-  (let ((*line-number* 0)
+  (sb-ext:gc :full t)
+  (setf *snark-verbose* verbose)
+  (let* ( 
+        (*line-number* 0)
         (*tackled-implies* nil)
         (sortal-fn (declarer-sorts-and-functors sorts
                                                 subsorts
                                                 functions
-                                                relations)))
-    (let ( 
-           
-          (start-time (get-internal-real-time))
-          (found  (prove! Premises Formula :sortal-fn sortal-fn))
-          (end-time (get-internal-real-time)))
-      (if found (make-instance 'proof :search-history found)))))
+                                                relations))
+        (start-time (get-internal-real-time))
+        (found  (prove! Premises Formula :sortal-fn sortal-fn))
+        (end-time (get-internal-real-time)))
+    (if found (make-instance 'proof :search-history found))))
 
+
+(defparameter *prover-done* nil)
+(defparameter *prover-result* nil)
+(defparameter *prover-lock* (bordeaux-threads:make-recursive-lock "prover-lock"))
+
+(defun prover (axioms f &key (time-limit 5) (verbose nil)
+                                     sortal-setup-fn)
+  (setf *prover-result* nil)
+  (setf *prover-done* nil)
+  (bordeaux-threads:make-thread 
+   (lambda ()
+     (if (prove-from-axioms axioms f 
+                            :time-limit time-limit
+                            :verbose verbose :sortal-setup-fn sortal-setup-fn)
+         (setf *prover-result* t))
+     (setf *prover-done* t)))
+  (dotimes (x (floor (/ time-limit .01)) *prover-result*)
+    (sleep 0.01)
+    (if *prover-done*
+         (return *prover-result*))))
 
 (defun shadow-prover (Premises Formula &key 
                                  sortal-fn
@@ -120,11 +145,11 @@
              (concatfn sortal-fn 
                        (lambda () 
                          (mapcar (lambda (s) (apply #'snark:declare-relation
-                                 s))
+                                                    s))
                                  (make-shadow-declarations shadows))))))
-        (prove-from-axioms (rest shadowed) (first shadowed) 
-                              :time-limit 0.1
-                              :verbose nil :sortal-setup-fn sortal-setup))))
+        (prover (rest shadowed) (first shadowed) 
+                           :time-limit 0.5
+                           :verbose *snark-verbose* :sortal-setup-fn sortal-setup))))
 (defun str* (base n) 
   (let ((str "")) 
     (loop for i from 1 to n do 
@@ -139,7 +164,7 @@
 
 (defun interactive-interface (info)
   (incf *line-number*)
-  (let ((command (PRINT 
+  (let ((command (prompt-read 
 		  (concatenate 'string 
 			       (princ-to-string *line-number*) 
 			       ":"
@@ -151,9 +176,9 @@
                                  sortal-fn
                                   
                                  (proof-stack nil) (caller nil))
-  (if *interactive* 
+  (if (or *debug* *interactive*) 
       (interactive-interface caller))
-
+  (if *debug*  (progn (print Premises) (print Formula)))
   (if (shadow-prover Premises Formula
                        :sortal-fn sortal-fn :proof-stack
                        proof-stack :caller caller)

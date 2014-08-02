@@ -54,6 +54,7 @@
 
 
 
+
 (defparameter *KB-es*
   (list
    '(forall (a time)
