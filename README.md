@@ -1,4 +1,10 @@
+Theory
+======
+
 ![alt text](http://www.naveensundarg.com/images/shadow.png "shadow")
+
+Algorithm Sketch
+================
 
 * **Step 1**: The prover first replaces all occurrences of atomic modal formulae by propositional variables (even nested occurrences).
              (Each modal formula *m* is assigned a unique
