@@ -1,7 +1,9 @@
 ![alt text](http://www.naveensundarg.com/images/shadow.png "shadow")
 
 * **Step 1**: The prover first replaces all occurences of atomic modal formulae by propositional variables (even nested occurences).
-             (Each modal formula is assigned a unique propositional variable: we call it the *propositional shadow*). Now we have a pure FOL problem.
+             (Each modal formula *m* is assigned a unique
+             propositional variable *s*: we call *s* the *propositional
+             shadow of m*). Now we have a pure FOL problem.
 
 * **Step 2**:  Call a first-order prover on this pure first-order problem.
 
