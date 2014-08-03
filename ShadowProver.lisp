@@ -2,15 +2,6 @@
 
 (in-package #:shadowprover)
 
-(defparameter *tackled-implies* nil)
-(defparameter *fol-counts* 0)
-(defparameter *modal-counts* 0)
-(defparameter *interactive* t)
-(defparameter *line-number* 1)
-(defparameter *snark-verbose* nil)
-(defparameter *expanded* nil)
-
-(defparameter *premises* nil)
 (defclass proof ()
   ((search-history :accessor search-history
          :initform 'search-history
@@ -54,28 +45,12 @@
 
 
 (defun forward (Premises Formula sortal-fn &optional (proof-stack nil))
-    
   (setf *modal-counts* (+ *modal-counts* 1)) (try 
       (lambda (fn) 
         (if *debug* (print fn))
           (funcall fn Premises Formula sortal-fn proof-stack))
       (mapcar #'symbol-function 
-              '(handle-DR2 
-                handle-DR3
-                handle-DR4
-                handle-DR5
-                handle-DR6
-                handle-DR12
-                handle-R4
-                handle-and-elim
-                handle-implies-elim
-                handle-implies-deeper
-                handle-or-elim
-                handle-univ-elim
-                handle-reductio
-                handle-DR1
-                handle-DR9
-                handle-DR19))))
+              *proof-calculus*)))
 
  
 

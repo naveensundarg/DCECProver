@@ -3,7 +3,7 @@
 (asdf:defsystem #:shadowprover
   :serial t
   :description "Describe ShadowProver here"
-  :author "Your Name <your.name@example.com>"
+  :author "Naveen Sundar G."
   :license "Specify license here"
   :depends-on (#:optima #:fiveam #:gtfl)
   :components ((:file "package")
@@ -18,8 +18,10 @@
                (:file "./inference-rules/derivedrules")
 
                (:file "./utils/show")
-
+               
+               (:file "configs")
                (:file "shadowprover")
+               
                (:file "./tests/dev-tests")
                (:file "./projects/akrasia/akrasia")
                (:file "./projects/false-belief-task/false-belief-task")))
