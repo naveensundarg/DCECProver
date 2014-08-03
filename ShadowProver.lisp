@@ -2,6 +2,15 @@
 
 (in-package #:shadowprover)
 
+
+(defparameter *tackled-backwards* nil)
+(defparameter *tackled-implies* nil)
+(defparameter *expanded* nil)
+(defparameter *premises* nil)
+(defparameter *fol-counts* 0)
+(defparameter *modal-counts* 0)
+(defparameter *line-number* 1)
+(defparameter *debug* nil)
 (defclass proof ()
   ((search-history :accessor search-history
          :initform 'search-history
@@ -44,13 +53,22 @@
     (otherwise (error "~ unimplemented rule." rule))))
 
 
+(defun backward (Premises Formula sortal-fn &optional (proof-stack nil))
+ (try 
+      (lambda (fn) 
+        (if *debug* (print fn))
+          (funcall fn Premises Formula sortal-fn proof-stack))
+      (mapcar #'symbol-function 
+              '(backward-DR1
+                backward-DR2))))
+
 (defun forward (Premises Formula sortal-fn &optional (proof-stack nil))
   (setf *modal-counts* (+ *modal-counts* 1)) (try 
       (lambda (fn) 
         (if *debug* (print fn))
           (funcall fn Premises Formula sortal-fn proof-stack))
       (mapcar #'symbol-function 
-              *proof-calculus*)))
+              *forward-proof-calculus*)))
 
  
 
@@ -77,16 +95,14 @@
                                  (proof-stack nil) (caller nil))
   (sb-ext:gc :full t)
   (setf *snark-verbose* verbose)
-  (let* ( 
-        (*line-number* 0)
-        (*tackled-implies* nil)
-        (sortal-fn (declarer-sorts-and-functors sorts
+  (let* ((*line-number* 0)
+         (*tackled-backwards* nil)
+         (*tackled-implies* nil)
+         (sortal-fn (declarer-sorts-and-functors sorts
                                                 subsorts
                                                 functions
                                                 relations))
-        (start-time (get-internal-real-time))
-        (found  (prove! Premises Formula :sortal-fn sortal-fn))
-        (end-time (get-internal-real-time)))
+        (found  (prove! Premises Formula :sortal-fn sortal-fn)))
     (if found (make-instance 'proof :search-history found))))
 
 
@@ -94,7 +110,7 @@
 (defparameter *prover-result* nil)
 (defparameter *prover-lock* (bordeaux-threads:make-recursive-lock "prover-lock"))
 
-(defun prover (axioms f &key (time-limit 5) (verbose nil)
+(defun threaded-prover (axioms f &key (time-limit 5) (verbose nil)
                                      sortal-setup-fn)
   (setf *prover-result* nil)
   (setf *prover-done* nil)
@@ -122,8 +138,8 @@
                          (mapcar (lambda (s) (apply #'snark:declare-relation
                                                     s))
                                  (make-shadow-declarations shadows))))))
-        (prover (rest shadowed) (first shadowed) 
-                           :time-limit 0.5
+        (prove-from-axioms (rest shadowed) (first shadowed) 
+                           :time-limit 0.1
                            :verbose *snark-verbose* :sortal-setup-fn sortal-setup))))
 (defun str* (base n) 
   (let ((str "")) 
@@ -158,13 +174,18 @@
                        :sortal-fn sortal-fn :proof-stack
                        proof-stack :caller caller)
       (add-to-proof-stack proof-stack :FOL Formula) 
-      (forward Premises Formula sortal-fn proof-stack )))
+      (or
+       (if (not (elem Formula *tackled-backwards*)) 
+           (let ()
+             (setf *tackled-backwards* (cons Formula *tackled-backwards*))
+             (backward Premises Formula sortal-fn proof-stack)))
+       (let () 
+         (setf *tackled-backwards* (cons Formula *tackled-backwards*))
+         (forward  Premises Formula sortal-fn proof-stack)))))
 
 
 
-(defun time-fn ())
-
-;;; show code
-
-;((defun )
+(defun run-all-tests ()
+(5am:explain! (5am:run 'shadowprover::shadowprover-dev-tests))
+)
 

@@ -13,6 +13,7 @@
                (:file "./utils/sorts")
                
                (:file "./inference-rules/expanders")
+               (:file "./inference-rules/backward-rules")
                (:file "./inference-rules/folrules")
                (:file "./inference-rules/primitiverules")
                (:file "./inference-rules/derivedrules")

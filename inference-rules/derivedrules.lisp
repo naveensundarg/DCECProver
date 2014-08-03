@@ -29,6 +29,7 @@
                                      (list
                                       (princ-to-string (first fresh))))
                  :caller (list 'handle-DR1 :got derived))))))
+
 (defun handle-DR2 (Premises Formula sortal-fn proof-stack)
   (let ((fresh
          (filter (lambda (CommonK-Agent)

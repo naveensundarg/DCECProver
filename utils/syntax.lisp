@@ -1,7 +1,8 @@
 (in-package :shadowprover)
 
 (defun add-to-proof-stack (proof-stack rule out &rest args)
-  (list (princ-to-string out) (append (list rule proof-stack) args)))
+  t;(list (princ-to-string out) (append (list rule proof-stack) args))
+  )
 (defun is-modal? (F)
   (optima:match F 
     ((or
