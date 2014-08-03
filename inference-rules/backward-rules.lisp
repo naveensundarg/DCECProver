@@ -3,6 +3,7 @@
  (declaim (ftype function prove!))
  (declaim (ftype function add-to-proof-stack))
 
+;; Do backward reasoning only if we are able to get a significantly smaller formula.
 (defun backward-DR1 (Premises Formula sortal-fn &optional (proof-stack nil))
   (optima:match Formula
     ((list 'knows _ t1 (list 'knows _ t2 P))
@@ -17,10 +18,4 @@
 (defun backward-DR2 (Premises Formula sortal-fn &optional (proof-stack nil))
   (optima:match Formula
     ((list 'knows _ time P)
-     (or (elem `(Common ,time ,P) Premises)
-      ;; (prove! Premises `(Common ,time ,P) 
-      ;;            :sortal-fn sortal-fn
-      ;;            :proof-stack (add-to-proof-stack proof-stack
-      ;;                                             :DR2 Formula)
-      ;;            :caller (list :backwards-dr2 Formula))
-      ))))
+      (elem `(Common ,time ,P) Premises))))

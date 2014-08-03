@@ -93,7 +93,7 @@
                                  (functions nil)
                                  (relations nil)
                                  (proof-stack nil) (caller nil))
-  (sb-ext:gc :full t)
+;  (sb-ext:gc :full t)
   (setf *snark-verbose* verbose)
   (let* ((*line-number* 0)
          (*tackled-backwards* nil)
@@ -138,9 +138,10 @@
                          (mapcar (lambda (s) (apply #'snark:declare-relation
                                                     s))
                                  (make-shadow-declarations shadows))))))
-        (prove-from-axioms (rest shadowed) (first shadowed) 
-                           :time-limit 0.1
-                           :verbose *snark-verbose* :sortal-setup-fn sortal-setup))))
+        (or (elem (first shadowed) (rest shadowed))
+         (prove-from-axioms (rest shadowed) (first shadowed) 
+                               :time-limit 0.1
+                               :verbose nil :sortal-setup-fn sortal-setup)))))
 (defun str* (base n) 
   (let ((str "")) 
     (loop for i from 1 to n do 
@@ -170,9 +171,9 @@
   (if (or *debug* *interactive*) 
       (interactive-interface caller))
   (if *debug*  (progn (print Premises) (print Formula)))
-  (if (shadow-prover Premises Formula
-                       :sortal-fn sortal-fn :proof-stack
-                       proof-stack :caller caller)
+  (if  (shadow-prover Premises Formula
+                        :sortal-fn sortal-fn :proof-stack
+                        proof-stack :caller caller)
       (add-to-proof-stack proof-stack :FOL Formula) 
       (or
        (if (not (elem Formula *tackled-backwards*)) 
