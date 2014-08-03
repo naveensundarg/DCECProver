@@ -7,8 +7,8 @@
 
 * **Step 2**:  Call a first-order prover on this first-order problem.
 
-* **Step 3**: If the FOL prover fails, we expand the premises a bit
+* **Step 3**: If the first-order prover fails, we expand the premises a bit
   with some usable modal rule (via forward reasoning natural
-  deduction) and repeat the process from  Step 1. If the prover
+  deduction) and repeat the process from  **Step 1**. If the prover
   succeeds, we return true.
 
