@@ -6,9 +6,9 @@
 
 Every atomic modal formula **m** is assigned a _unique propositional_
    variable **s**: We call **s** the *propositional shadow of* **m**. For any
-   formula *f[* **m***,..]*, the corresponding formula *f[* **s***,...]*, with all atomic
+   formula *f[* **m** *,..]*, the corresponding formula *f[* **s** *,...]*, with all atomic
    modal formulae replaced by their propositional shadows,  is called
-   the shadow of *f[* **m***,..]*.)
+   the shadow of *f[* **m** *,..]*.)
 			 
 * **Step 1**: The prover first replaces all occurrences of atomic
              modal formulae by propositional variables (even nested
