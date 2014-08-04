@@ -7,7 +7,7 @@
 
 (defparameter *interactive* nil)
 (defparameter *snark-verbose* t)
-
+(defparameter *optimize* nil)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;; Proof Calculus ;;;;;;;;;;;;;
