@@ -28,8 +28,8 @@
 (defun declare-default-functors ())
 
 
-(defun true? (x) (prove-from-axioms nil x))
-(defun false? (x) (prove-from-axioms nil `(not ,x)))
+(defun true? (x) (first (prove-from-axioms nil x)))
+(defun false? (x) (first (prove-from-axioms nil `(not ,x))))
 
 (defun declarer-sorts-and-functors (sorts subsorts functions relations )
   (lambda () (declare-default-sorts)
@@ -116,9 +116,9 @@
   (setf *prover-done* nil)
   (bordeaux-threads:make-thread 
    (lambda ()
-     (if (prove-from-axioms axioms f 
-                            :time-limit time-limit
-                            :verbose verbose :sortal-setup-fn sortal-setup-fn)
+     (if (first (prove-from-axioms axioms f 
+                                   :time-limit time-limit
+                                   :verbose verbose :sortal-setup-fn sortal-setup-fn))
          (setf *prover-result* t))
      (setf *prover-done* t)))
   (dotimes (x (floor (/ time-limit .01)) *prover-result*)
@@ -139,9 +139,9 @@
                                                     s))
                                  (make-shadow-declarations shadows))))))
         (or (elem (first shadowed) (rest shadowed))
-         (prove-from-axioms (rest shadowed) (first shadowed) 
-                               :time-limit 0.1
-                               :verbose nil :sortal-setup-fn sortal-setup)))))
+            (first (prove-from-axioms (rest shadowed) (first shadowed) 
+                                      :time-limit 0.1
+                                      :verbose nil :sortal-setup-fn sortal-setup))))))
 (defun str* (base n) 
   (let ((str "")) 
     (loop for i from 1 to n do 

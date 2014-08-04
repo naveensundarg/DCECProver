@@ -123,3 +123,5 @@
                   '(= morning_star evening_star)
                   '(knows a now (= morning_star morning_star)))
     '(and P (not P)) )))
+
+(5am:test dt18 "")

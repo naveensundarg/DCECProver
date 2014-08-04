@@ -46,31 +46,33 @@
   (snark:allow-skolem-symbols-in-answers nil))
 
 (defun row-formula (name))
-(defun prove-from-axioms (axioms f
+(defun prove-from-axioms (all-axioms f
                           &key 
                             (time-limit 5) 
                             (verbose nil)
                             sortal-setup-fn)
-  (setup-snark :time-limit time-limit :verbose verbose)
-  (if sortal-setup-fn (funcall sortal-setup-fn))
-  (let* ((n-a (make-hash-table :test #'equalp))
-         (a-n (make-hash-table :test #'equalp)))
-    (mapcar (lambda (axiom)
-              (let ((name (gensym)))
-                (setf (gethash (princ-to-string axiom) a-n) name)
-                (setf (gethash (princ-to-string name) n-a) axiom))) axioms)
-    (mapcar (lambda (axiom)
-              (snark::assert axiom :name  (gethash (princ-to-string axiom) a-n)))
-            (mapcar #'!@ axioms))
-    (if (equalp :PROOF-FOUND (snark:prove (!@ f)))
-        (list t (remove nil 
+  (let ((axioms (remove-duplicates all-axioms :test #'equalp)))
+    (setup-snark :time-limit time-limit :verbose verbose)
+    (if sortal-setup-fn (funcall sortal-setup-fn))
+    (let* ((n-a (make-hash-table :test #'equalp))
+           (a-n (make-hash-table :test #'equalp)))
+      (mapcar (lambda (axiom)
+                (let ((name (gensym)))
+                  (setf (gethash (princ-to-string axiom) a-n) name)
+                  (setf (gethash (princ-to-string name) n-a) axiom))) axioms)
+      (mapcar (lambda (axiom)
+                (snark::assert axiom ;:name  ;(gethash (princ-to-string axiom) a-n)
+                               ))
+              (mapcar #'!@ axioms))
+      (if (equalp :PROOF-FOUND (snark:prove (!@ f)))
+          (list t (remove nil 
                           (mapcar 
                            (lambda (row reason)
                              (if (equalp reason 'snark::ASSERTION)
                                  (gethash (princ-to-string (snark:row-name row)) n-a )))
                            (snark:row-ancestry (snark:proof))
                            (mapcar 'snark:row-reason (snark:row-ancestry (snark:proof)))))) 
-        (list nil nil))))
+          (list nil nil)))))
 
 
 
