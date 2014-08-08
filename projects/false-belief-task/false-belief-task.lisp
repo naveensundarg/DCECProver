@@ -1,7 +1,7 @@
 (in-package :shadowprover)
 
 (declare-signature 
- *signature*
+ *false-belief-signature*
  (:name f :output fluent :inputs nil)
  (:name a1 :output agent :inputs nil)
  (:name a2 :output agent :inputs nil)
@@ -58,25 +58,29 @@
 (5am:test M1-2
   (5am:is-true
    (prove (list *M1-p1*)
-          '(knows a1 now (happens (action a2 alpha) t)))))
+          '(knows a1 now (happens (action a2 alpha) t))
+          :signature *false-belief-signature*)))
 
 (5am:test M1-3
   (5am:is-true
    (prove (list *M1-p1* *A4* )
           '(knows a1 now (forall ((?a Agent) (?d ActionType) (?t Moment))
                           (implies (happens (action ?a ?d) ?t)
-                           (knows ?a ?t (happens (action ?a ?d) ?t))))))))
+                           (knows ?a ?t (happens (action ?a ?d) ?t)))))
+          :signature *false-belief-signature*)))
 
 
 (5am:test M1-5
   (5am:is-true 
    (prove (list *M1-p1* *A4* )
-          '(knows a1 now (knows a2 t (happens (action a2 alpha) t))))))
+          '(knows a1 now (knows a2 t (happens (action a2 alpha) t)))
+          :signature *false-belief-signature*)))
 
 (5am:test M3-2
   (5am:is-true
    (prove (list *M3-P2*)
-          '(believes a1 now (believes a2 now (holds f t1))))))
+          '(believes a1 now (believes a2 now (holds f t1)))
+          :signature *false-belief-signature*)))
 
 (5am:test M3-3
   (5am:is-true 
@@ -88,7 +92,8 @@
                                           (and (believes a2 now  (happens ?e ?t)) 
                                                (believes a2 now (and (< t1 ?t) (< ?t t2)))
                                                (believes a2 now (terminates ?e f ?t))))))) 
-            (believes a1 now (not (believes a2 now (clipped t1 f t2))))))))
+            (believes a1 now (not (believes a2 now (clipped t1 f t2)))))
+          :signature *false-belief-signature*)))
 
 
 
@@ -96,7 +101,8 @@
   (5am:is-true
    (prove 
     (list *M3-P3* *A6* *M3-P2*)
-    '(believes a1 now (not (believes a2 now (clipped t1 f t2)))))))
+    '(believes a1 now (not (believes a2 now (clipped t1 f t2))))
+    :signature *false-belief-signature*)))
 
 
 (5am:test M3-5
@@ -107,7 +113,8 @@
                            (and (believes ?a now (holds ?f ?t))
                                 (believes ?a now (< ?t ?t1))
                                 (not (believes ?a now  (clipped ?t ?f ?t1))))
-                           (believes ?a now (holds ?f ?t1))))))))
+                           (believes ?a now (holds ?f ?t1)))))
+          :signature *false-belief-signature*)))
 
 (5am:test M3-6
   (5am:is-true
@@ -118,13 +125,15 @@
                (believes a2 now (holds f t1))
                (believes a2 now (< t1 t2))
                (not (believes a2 now  (clipped t1 f t2))))
-              (believes a2 now (holds f t2)))))))
+              (believes a2 now (holds f t2))))
+          :signature *false-belief-signature*)))
 
 
 (5am:test M3-7
   (5am:is-true
    (prove (list *M3-P1*)
-          '(believes a1 now (believes a2 now (< t1 t2))))))
+          '(believes a1 now (believes a2 now (< t1 t2)))
+          :signature *false-belief-signature*)))
 
 
 (5am:test M3-8
@@ -140,4 +149,5 @@
            '(believes a1 now (believes a2 now (holds f t1)))
            '(believes a1 now (believes a2 now (< t1 t2)))
            '(believes a1 now (not (believes a2 now (clipped t1 f t2)))))
-          '(believes a1 now (believes a2 now (holds f t2))))))
+          '(believes a1 now (believes a2 now (holds f t2)))
+          :signature *false-belief-signature*)))

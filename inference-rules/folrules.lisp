@@ -86,8 +86,8 @@
                         sortal-fn :proof-stack proof-stack
                         :caller (list :or-elim :sub-right right ))))
           (if (and left-proof right-proof)
-              (add-to-proof-stack proof-stack :or-elim Formula (list
-  (princ-to-string disjunct)) left-proof right-proof))))))
+              (add-to-proof-stack (append left-proof right-proof proof-stack) :or-elim Formula (list
+                                                                   disjunct)))))))
 
 (defparameter *in-reductio?* nil)
 

@@ -3,18 +3,18 @@
 (5am:in-suite akrasia-tests)
 
 
-(defun declare-akrasia-sigs ()
-    (sorts:declare-signature 
-     *signature*
-     (:name s :output Agent :inputs nil)
-     (:name damaged :output fluent :inputs (agent))
-     (:name kick :output actiontype :inputs (agent))
-     (:name harm :output actiontype :inputs (agent))
-     (:name initiates :output boolean :inputs (action fluent moment))
-     (:name happens :output boolean :inputs (action moment))
-     (:name holds :output boolean :inputs (fluent moment))
-     (:name tp :output moment :inputs nil)
-     (:name tf :output moment :inputs nil)))
+
+(sorts:declare-signature 
+ *akrasia-signature*
+ (:name s :output Agent :inputs nil)
+ (:name damaged :output fluent :inputs (agent))
+ (:name kick :output actiontype :inputs (agent))
+ (:name harm :output actiontype :inputs (agent))
+ (:name initiates :output boolean :inputs (action fluent moment))
+ (:name happens :output boolean :inputs (action moment))
+ (:name holds :output boolean :inputs (fluent moment))
+ (:name tp :output moment :inputs nil)
+ (:name tf :output moment :inputs nil))
 
  
 
@@ -84,12 +84,14 @@
 (5am:test case-1
   (5am:is-true
    (prove *akrasia-simulation*
-          '(happens (action (* I) (harm s)) tf))))
+          '(happens (action (* I) (harm s)) tf)
+          :signature *akrasia-signature*)))
 
 (5am:test case-2
   (5am:is-true
    (prove (append *akrasia-simulation* *KB-es*)
-          '(and P (not P)))))
+          '(and P (not P))
+          :signature *akrasia-signature*)))
 
 
 

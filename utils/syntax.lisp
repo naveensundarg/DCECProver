@@ -29,6 +29,8 @@
                  (mapcar (lambda (premise) (justify premise (remove (first steps) proof-stack)))
                                (premises (first steps))))))))
 
+(defun get-sub-proof (proof)
+  (cond ((equalp (first proof) 'suppose-absurd) (first (rest (rest (rest proof)))))))
 (defun proof-to-tree (proof formula)
   (if (not (null proof))
       (let* ((step (find-step proof formula))
@@ -36,7 +38,10 @@
             (premises (premises step)))
         (list (princ-to-string formula)
               (if step 
-                  (cons (concatenate 'string ">" (princ-to-string justification))
+                  (cons (if (atom justification)
+                            (concatenate 'string ">" (princ-to-string
+                                                      justification))
+                             "SUB")
                         (mapcar (lambda (premise) 
                                   (proof-to-tree proof premise)) premises))
                   (list "PREMISE"))))))
@@ -297,6 +302,6 @@
                             (modal-F f))))
 
  
-(defun subs (f)
-  (cond ((atom f) (list f))
-        ((knowledge? f) (cons (k-to-b f) (list (subs (modal-F f)))))))
+;; (defun subs (f)
+;;   (cond ((atom f) (list f))
+;;         ((knowledge? f) (cons (k-to-b f) (list (subs (modal-F f)))))))

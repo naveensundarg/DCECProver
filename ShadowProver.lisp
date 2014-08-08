@@ -91,15 +91,17 @@
 
 
 (defun prove (Premises Formula  &key 
+                                  (signature *signature*)
                                   (verbose nil)
-                                 (sorts nil) 
-                                 (subsorts nil)
-                                 (functions nil)
-                                 (relations nil)
-                                 (proof-stack nil) (caller nil))
+                                  (sorts nil) 
+                                  (subsorts nil)
+                                  (functions nil)
+                                  (relations nil)
+                                  (proof-stack nil) (caller nil))
 ;  (sb-ext:gc :full t)
   (setf *snark-verbose* verbose)
-  (let* ((*line-number* 0)
+  (let* ((*signature* signature)
+         (*line-number* 0)
          (*tackled-backwards* nil)
          (*tackled-implies* nil)
          (sortal-fn (declarer-sorts-and-functors sorts

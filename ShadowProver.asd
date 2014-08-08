@@ -25,5 +25,6 @@
                
                (:file "./tests/dev-tests")
                (:file "./projects/akrasia/akrasia")
-               (:file "./projects/false-belief-task/false-belief-task")))
+               (:file "./projects/false-belief-task/false-belief-task")
+               (:file "./projects/wise-men-puzzle/wise-men-puzzle")))
 
