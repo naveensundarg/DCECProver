@@ -33,8 +33,10 @@
          Formula
          :sortal-fn sortal-fn
          :proof-stack
-         (cons `(:implies-elim  ,(list (princ-to-string (first unused-implies-elim-args))))  
-               proof-stack)
+         (add-to-proof-stack proof-stack :implies-elim 
+                              (apply-rule
+                               :implies-elim (first unused-implies-elim-args))
+                              (first unused-implies-elim-args) )
          :caller (list 'implies-elim :got
                        (apply-rule :implies-elim (first unused-implies-elim-args)))))))
 
@@ -49,11 +51,17 @@
          Formula
          :sortal-fn sortal-fn
          :proof-stack 
-         (add-to-proof-stack proof-stack
-                             :and-elim
-                             (rest (first unused-and-elim-args))
-                             (list (princ-to-string (first
-                                                     unused-and-elim-args))))
+         (add-to-proof-stack 
+          (add-to-proof-stack
+           proof-stack
+           :and-elim
+           (first (apply-rule :and-elim (first unused-and-elim-args)))
+           (list (first
+                  unused-and-elim-args)))
+          :and-elim
+          (second (apply-rule :and-elim (first unused-and-elim-args)))
+          (list (first
+                 unused-and-elim-args)))
          :caller  (list 'and-elim :got (append 
           (apply-rule :and-elim (first unused-and-elim-args))
           premises))))))
@@ -94,9 +102,13 @@
                          (prove! (cons `(not ,Formula) Premises) 
                                  absurd 
                                  :sortal-fn sortal-fn
-                                 :proof-stack proof-stack
+                                 :proof-stack nil
                                  :caller (list 'from-reductio Formula))))))
-    (if reductio (add-to-proof-stack proof-stack absurd reductio))))
+    (if reductio (add-to-proof-stack 
+                  proof-stack
+                  (list 'suppose-absurd
+                        `(not ,Formula) 'in
+                        (dseq reductio)) formula (premises* reductio)))))
 
 
 

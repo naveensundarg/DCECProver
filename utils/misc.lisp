@@ -39,14 +39,16 @@
 (defun multiply (x lists)
   (mapcar (lambda (list) (cons x list)) lists))
 
-(defun k-to-b (f)
-  (and (knowledge? f) (list 'believes 
-                            (modal-agent f)
-                            (modal-time f)
-                            (modal-F f))))
-
- 
-(defun subs (f)
-  (cond ((atom f) (list f))
-        ((knowledge? f) (cons (k-to-b f) (list (subs (modal-F f)))))
-        ))
+;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;; named counters;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;
+(defparameter *named-counters* (make-hash-table :test #'equal))
+(defun reset-all-named-counters ()
+    (setf *named-counters* (make-hash-table :test #'equal)) (values))
+(defun reset-counter (name)
+  (setf (gethash name *named-counters*) 0))
+(defun next-counter (name)
+  (let ((curr (gethash name *named-counters*)))
+    (if (not curr)
+        (let nil (setf (gethash name *named-counters*) 1)  0)
+        (let nil (setf (gethash name *named-counters*) (1+ curr))  curr))))

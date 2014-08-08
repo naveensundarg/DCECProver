@@ -2,9 +2,9 @@
 
 (asdf:defsystem #:shadowprover
   :serial t
-  :description "Describe ShadowProver here"
+  :description "A prover for DCEC, a first-order modal logic."
   :author "Naveen Sundar G."
-  :license "Specify license here"
+  :license "MIT BSD"
   :depends-on (#:optima #:fiveam #:gtfl)
   :components ((:file "package")
                (:file "./snark-20120808r022/snark-interface")

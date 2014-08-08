@@ -11,11 +11,13 @@
          (prove! Premises `(Common ,t1 ,P) 
                  :sortal-fn sortal-fn
                  :proof-stack (add-to-proof-stack proof-stack
-                                                  :DR1 Formula)
+                                                  :DR1 Formula Premises)
                   :caller (list :backwards-dr1 Formula))))))
 
 
 (defun backward-DR2 (Premises Formula sortal-fn &optional (proof-stack nil))
   (optima:match Formula
     ((list 'knows _ time P)
-      (elem `(Common ,time ,P) Premises))))
+     (if (elem `(Common ,time ,P) Premises)
+         (add-to-proof-stack proof-stack
+                             :DR1 Formula Premises)))))

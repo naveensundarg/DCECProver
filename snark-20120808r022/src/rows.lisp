@@ -360,11 +360,13 @@
            (number (row-number row)))
       (cl:assert (integerp number))
       (let ((number2 (gethash name *row-names*)))
-        (when (and number2 (neql number number2))
-          (warn "Naming row ~D ~A, but row ~D is already named ~A.  Reusing the name." number name number2 name)))
+        ;; (when (and number2 (neql number number2))
+        ;;   (warn "Naming row ~D ~A, but row ~D is already named ~A.  Reusing the name." number name number2 name))
+        )
       (let ((name2 (row-name row)))
-        (when (and name2 (neql name name2))
-          (warn "Naming row ~D ~A, but row ~D is already named ~A.  Renaming the row." number name number name2)))
+        ;; (when (and name2 (neql name name2))
+        ;;   (warn "Naming row ~D ~A, but row ~D is already named ~A.  Renaming the row." number name number name2))
+        )
       (setf (gethash name *row-names*) number)
       (setf (row-name row) name))))
 

@@ -4,7 +4,7 @@
 (defpackage #:snark-interface
   (:documentation "Abstracting over SNARK's wonky interface.")
   (:use #:cl)
-  (:export  #:!@ :consistent? :prove-from-axioms))
+  (:export  #:proved? #:used-premises #:!@ :consistent? :prove-from-axioms))
 
 (defpackage #:sorts-system 
   (:documentation "Enumerating all terms of a certain depth given signature.")

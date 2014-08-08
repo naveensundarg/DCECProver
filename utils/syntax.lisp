@@ -1,9 +1,72 @@
 (in-package :shadowprover)
 
-(defun add-to-proof-stack (proof-stack rule out &rest args)
+(defun justification (step) (first step))
+(defun out (step) (third step))
+(defmethod outp (proof) (out (first (last proof))))
+
+(defun find-step (proof formula) 
+  (first (remove-if-not (lambda (step) (equalp formula
+                                               (out
+                                                step)))
+                        proof)))
+(defun premises (step) (second step))
+
+(defun premises* (steps)
+  (remove-duplicates
+   (reduce #'append (mapcar (lambda (step) 
+                              (if (atom (justification step)) 
+                                  (premises step) 
+                                  (premises* (premises step)))) steps))
+   :test #'equalp))
+
+(defun justify (formula proof-stack)
+
+  (let ((steps (remove-if-not (lambda (step) (equalp formula (out step))) proof-stack)))
+    (if steps
+        (cons  
+         (first steps) 
+         (reduce #'append 
+                 (mapcar (lambda (premise) (justify premise (remove (first steps) proof-stack)))
+                               (premises (first steps))))))))
+
+(defun proof-to-tree (proof formula)
+  (if (not (null proof))
+      (let* ((step (find-step proof formula))
+            (justification (justification step))
+            (premises (premises step)))
+        (list (princ-to-string formula)
+              (if step 
+                  (cons (concatenate 'string ">" (princ-to-string justification))
+                        (mapcar (lambda (premise) 
+                                  (proof-to-tree proof premise)) premises))
+                  (list "PREMISE"))))))
+
+(defun remove-duplicated-sub-trees (tree &optional 
+                                           (trees (make-hash-table
+  :test #'equalp)))
+  (if (zerop (hash-table-size trees)) (reset-counter "proof-"))
+   (labels ((name (x) (first x))
+           (children (x) (rest x)))
+     (if (and (gethash tree trees) (not (premise-node? (name tree))))
+         (list (concatenate 'string "Node [" (princ-to-string (gethash tree
+                                           trees)) "]"))
+         (let ((curr-id (next-counter "proof-")))
+           (setf (gethash tree trees) 
+                 curr-id)
+              (cons (concatenate 'string (name tree)
+                                "[" (princ-to-string curr-id) "]") 
+                    (mapcar (lambda (child) (remove-duplicated-sub-trees child
+                                                                         trees))
+                            (children tree)))))))
+
+(defun trim (proof)
+  (justify (out (first proof)) proof))
+
+(defun dseq (proof-stack)  (reverse (trim proof-stack)))
+(defun add-to-proof-stack (proof-stack rule out args)
   (if *optimize*
       t
-      (list (princ-to-string out) (append (list rule proof-stack) args))))
+      (cons  (list rule args out) proof-stack)))
 (defun is-modal? (F)
   (optima:match F 
     ((or
@@ -15,7 +78,7 @@
     (_ nil)))
 
 (defun connective (F) (first F))
-(defparameter *shadows* nil)
+(defparameter *shadows* (make-hash-table))
 
 (defun make-name (formula)
   (cl-ppcre:regex-replace-all "[\\\s]"
@@ -27,7 +90,7 @@
   "Converts a modal formula to its propositional shadow."
   (if (is-modal? formula)  
       (let ((shadow (make-symbol (make-name formula))))
-        (setf *shadows* (cons shadow *shadows*))
+        (setf (gethash formula *shadows*) shadow)
         shadow)
       (optima:match formula 
         ((cons (or 'and 'or 'implies 'iff) args)
@@ -42,7 +105,7 @@
         (_ formula))))
 
 (defun shadow-all (Formulae)
-  (let ((*shadows* nil)) 
+  (let ((*shadows* (make-hash-table))) 
     (let ((shadowed (mapcar (lambda (formula) (shadow-formula formula)) 
                             Formulae)))
       (values shadowed *shadows*))))
@@ -225,3 +288,15 @@
             (rest-vars Univ) 
             (subst term  (top-var Univ) (kernel Univ)))
       (subst term (top-var Univ) (kernel Univ))))
+
+
+(defun k-to-b (f)
+  (and (knowledge? f) (list 'believes 
+                            (modal-agent f)
+                            (modal-time f)
+                            (modal-F f))))
+
+ 
+(defun subs (f)
+  (cond ((atom f) (list f))
+        ((knowledge? f) (cons (k-to-b f) (list (subs (modal-F f)))))))

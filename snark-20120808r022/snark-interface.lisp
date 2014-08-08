@@ -61,7 +61,7 @@
                   (setf (gethash (princ-to-string axiom) a-n) name)
                   (setf (gethash (princ-to-string name) n-a) axiom))) axioms)
       (mapcar (lambda (axiom)
-                (snark::assert axiom ;:name  ;(gethash (princ-to-string axiom) a-n)
+                (snark::assert axiom :name  (gethash (princ-to-string axiom) a-n)
                                ))
               (mapcar #'!@ axioms))
       (if (equalp :PROOF-FOUND (snark:prove (!@ f)))
@@ -75,7 +75,8 @@
           (list nil nil)))))
 
 
-
+(defun proved? (ans) (first ans))
+(defun used-premises (ans) (second ans))
 (defun consistent? (statements time)
   (not (prove-from-axioms statements '(and P (not P)) :time-limit time)))
 

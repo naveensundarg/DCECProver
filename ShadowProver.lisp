@@ -12,9 +12,13 @@
 (defparameter *line-number* 1)
 (defparameter *debug* nil)
 (defclass proof ()
-  ((search-history :accessor search-history
-         :initform 'search-history
-         :initarg :search-history)))
+  ((proof :accessor proof
+          :initform 'proof
+          :initarg :proof)))
+
+(defmethod print-object ((object proof) stream)
+  (format stream "~a" (proof object)))
+
 (defun declare-default-sorts ()
   (snark:declare-sort 'snark::Obj)
   (snark:declare-sort 'snark::Action)
@@ -65,7 +69,7 @@
 (defun forward (Premises Formula sortal-fn &optional (proof-stack nil))
   (setf *modal-counts* (+ *modal-counts* 1)) (try 
       (lambda (fn) 
-        (if *debug* (print fn))
+         (if *debug* (print fn))
           (funcall fn Premises Formula sortal-fn proof-stack))
       (mapcar #'symbol-function 
               *forward-proof-calculus*)))
@@ -103,7 +107,7 @@
                                                 functions
                                                 relations))
         (found  (prove! Premises Formula :sortal-fn sortal-fn)))
-    (if found (make-instance 'proof :search-history found))))
+    (if found (dseq found))))
 
 
 (defparameter *prover-done* nil)
@@ -122,7 +126,7 @@
          (setf *prover-result* t))
      (setf *prover-done* t)))
   (dotimes (x (floor (/ time-limit .01)) *prover-result*)
-    (sleep 0.01)
+    (sleep 0.02)
     (if *prover-done*
          (return *prover-result*))))
 
@@ -130,18 +134,31 @@
                                  sortal-fn
                                  (proof-stack nil) (caller nil))
   (setf *fol-counts*  (+ 1 *fol-counts*))
-    (multiple-value-bind (shadowed shadows) 
+    (multiple-value-bind (shadowed shadow-table) 
         (shadow-all (cons Formula Premises))
       (let ((sortal-setup   
              (concatfn sortal-fn 
                        (lambda () 
                          (mapcar (lambda (s) (apply #'snark:declare-relation
                                                     s))
-                                 (make-shadow-declarations shadows))))))
-        (or (elem (first shadowed) (rest shadowed))
-            (first (prove-from-axioms (rest shadowed) (first shadowed) 
+                                 (make-shadow-declarations (maphash (lambda
+                                                                        (key
+                                 value)
+                                                                      (declare
+                                 (ignore key)) value) shadow-table)))))))
+        (let ((ans (prove-from-axioms (rest shadowed) (first shadowed) 
                                       :time-limit 0.1
-                                      :verbose nil :sortal-setup-fn sortal-setup))))))
+                                      :verbose nil :sortal-setup-fn
+                                      sortal-setup)))
+          (if (proved? ans)
+              (list t 
+                    (let ((prems (used-premises ans)))
+                      (maphash
+                       (lambda (key value)
+                         (setf prems (subst key value prems :test
+                                            #'equalp)))
+                       shadow-table) prems)))))))
+
 (defun str* (base n) 
   (let ((str "")) 
     (loop for i from 1 to n do 
@@ -171,18 +188,19 @@
   (if (or *debug* *interactive*) 
       (interactive-interface caller))
   (if *debug*  (progn (print Premises) (print Formula)))
-  (if  (shadow-prover Premises Formula
+  (let ((shadow-ans (shadow-prover Premises Formula
                         :sortal-fn sortal-fn :proof-stack
-                        proof-stack :caller caller)
-      (add-to-proof-stack proof-stack :FOL Formula) 
-      (or
-       (if (not (elem Formula *tackled-backwards*)) 
-           (let ()
-             (setf *tackled-backwards* (cons Formula *tackled-backwards*))
-             (backward Premises Formula sortal-fn proof-stack)))
-       (let () 
-         (setf *tackled-backwards* (cons Formula *tackled-backwards*))
-         (forward  Premises Formula sortal-fn proof-stack)))))
+                        proof-stack :caller caller)))
+      (if  shadow-ans
+           (add-to-proof-stack proof-stack :FOL Formula (used-premises shadow-ans)) 
+       (or
+        (if (not (elem Formula *tackled-backwards*)) 
+            (let ()
+              (setf *tackled-backwards* (cons Formula *tackled-backwards*))
+              (backward Premises Formula sortal-fn proof-stack)))
+        (let () 
+          (setf *tackled-backwards* (cons Formula *tackled-backwards*))
+          (forward  Premises Formula sortal-fn proof-stack))))))
 
 
 

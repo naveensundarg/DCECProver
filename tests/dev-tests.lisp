@@ -119,9 +119,10 @@
 
 (5am:test dt17 "FOL is transparent when it comes to references."
   (5am:is-true
-   (snark-interface:prove-from-axioms (list '(not (knows a now (= morning_star evening_star)))
-                  '(= morning_star evening_star)
-                  '(knows a now (= morning_star morning_star)))
+   (snark-interface:prove-from-axioms 
+    (list '(not (knows a now (= morning_star evening_star)))
+          '(= morning_star evening_star)
+          '(knows a now (= morning_star morning_star)))
     '(and P (not P)) )))
 
 (5am:test dt18 "")

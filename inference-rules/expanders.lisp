@@ -22,6 +22,5 @@
                    (add-to-proof-stack proof-stack 
                                        ',name 
                                        derived 
-                                       (list
-                                        (princ-to-string (first fresh)))) 
+                                       (first fresh)) 
                    :caller (list ',name :got derived)))))))

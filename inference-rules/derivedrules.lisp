@@ -26,8 +26,7 @@
                  (add-to-proof-stack proof-stack 
                                      :DR2 
                                      derived 
-                                     (list
-                                      (princ-to-string (first fresh))))
+                                       (first fresh))
                  :caller (list 'handle-DR1 :got derived))))))
 
 (defun handle-DR2 (Premises Formula sortal-fn proof-stack)
@@ -50,8 +49,7 @@
                  (add-to-proof-stack proof-stack 
                                      :DR2 
                                      derived 
-                                     (list
-                                      (princ-to-string (first fresh))))
+                                     (first fresh))
                  :caller (list 'handle-DR2 :got derived))))))
 
 (defun matches? (x y) (equalp x y))
@@ -87,8 +85,7 @@
                  (add-to-proof-stack proof-stack 
                                      :D9 
                                      derived 
-                                     (list
-                                      (princ-to-string (first fresh))))
+                                     (first fresh))
                  :caller (list 'handle-DR9 :got derived))))))
 
 
@@ -116,10 +113,9 @@
                  :sortal-fn sortal-fn
                  :proof-stack 
                  (add-to-proof-stack proof-stack 
-                                     :D9 
+                                     :univ-elim 
                                      derived 
-                                     (list
-                                      (princ-to-string (first fresh))))
+                                       (first fresh))
                  :caller (list 'univ-elim :got derived))))))
 
 
