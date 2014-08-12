@@ -5,6 +5,8 @@
 
 (defparameter *tackled-backwards* nil)
 (defparameter *tackled-implies* nil)
+(defparameter *tackled-disjuncts* nil)
+
 (defparameter *expanded* nil)
 (defparameter *premises* nil)
 (defparameter *fol-counts* 0)

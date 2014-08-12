@@ -9,4 +9,5 @@
   (run-test 'shadowprover-dev-tests)
   (run-test 'false-belief-tests)
   (run-test 'akrasia-tests)
-  (run-test 'wise-men))
+  (run-test 'wise-men)
+  (run-test 'knights-and-knaves))

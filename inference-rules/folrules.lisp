@@ -2,7 +2,8 @@
 
 
 (defun unused-or-args (premises)
-  (filter #'or? premises))
+  (filter (lambda (premise) (and (or? premise) (not (elem premise *tackled-disjuncts*))))
+          premises))
 
 (defun unused-and-elim-args (premises)
   (filter (lambda (formula)
@@ -71,10 +72,11 @@
   (let ((unused-or-args (unused-or-args premises))) 
     (if unused-or-args 
         (let* ((disjunct (first unused-or-args))
+               (*tackled-disjuncts* (cons disjunct *tackled-disjuncts*))
                (disjuncts (args disjunct))
                (left (first disjuncts))
                (right (second disjuncts))
-               (reduced-premises (remove disjunct Premises :test #'equalp)) 
+               (reduced-premises  Premises) 
                (left-proof 
                 (prove! (cons left reduced-premises) 
                         Formula :sortal-fn 

@@ -51,6 +51,7 @@
                           (and (believes a2 now  (happens ?e ?t)) 
                                (believes a2 now (and (< t1 ?t) (< ?t t2)))
                                (believes a2 now (terminates ?e f ?t)))))))
+
 (5am:def-suite false-belief-tests)
 (5am:in-suite false-belief-tests)
 
