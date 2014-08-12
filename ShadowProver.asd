@@ -8,7 +8,7 @@
   :depends-on (#:optima #:fiveam #:gtfl)
   :components ((:file "package")
                (:file "configs")
-
+               (:file "params")
                (:file "./snark-20120808r022/snark-interface")
                (:file "./utils/misc")
                (:file "./utils/syntax")
@@ -28,5 +28,6 @@
                (:file "./projects/akrasia/akrasia")
                (:file "./projects/false-belief-task/false-belief-task")
                (:file "./projects/wise-men-puzzle/wise-men-puzzle")
+               (:file "./projects/knights-and-knaves/knights-and-knaves")
                (:file "./tests/all-tests")))
 
