@@ -7,6 +7,8 @@
   :license "MIT BSD"
   :depends-on (#:optima #:fiveam #:gtfl)
   :components ((:file "package")
+               (:file "configs")
+
                (:file "./snark-20120808r022/snark-interface")
                (:file "./utils/misc")
                (:file "./utils/syntax")
@@ -20,11 +22,11 @@
 
                (:file "./utils/show")
                
-               (:file "configs")
                (:file "shadowprover")
                
                (:file "./tests/dev-tests")
                (:file "./projects/akrasia/akrasia")
                (:file "./projects/false-belief-task/false-belief-task")
-               (:file "./projects/wise-men-puzzle/wise-men-puzzle")))
+               (:file "./projects/wise-men-puzzle/wise-men-puzzle")
+               (:file "./tests/all-tests")))
 

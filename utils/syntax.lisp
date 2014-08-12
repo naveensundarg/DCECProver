@@ -79,6 +79,7 @@
       (list 'knows _ _ _) 
       (list 'desires _ _ _)             
       (list 'sees _ _ _)
+      (list 'says _ _ _) 
       (list 'believes _ _ _)) t)
     (_ nil)))
 

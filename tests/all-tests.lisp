@@ -1,0 +1,12 @@
+(in-package #:shadowprover)
+
+(defun msg (x) 
+  (format t "~%[Runnng ~a ]~%" x))
+(defun run-test (spec)
+  (msg spec)
+  (5am:explain! (5am:run spec)))
+(defun run-all-projects-and-tests ()
+  (run-test 'shadowprover-dev-tests)
+  (run-test 'false-belief-tests)
+  (run-test 'akrasia-tests)
+  (run-test 'wise-men))

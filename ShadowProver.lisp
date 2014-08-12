@@ -82,7 +82,7 @@
                                                                 Premises)
           Formula caller))
 (defparameter *sorts* nil)
-
+(defparameter *signature* nil)
 (defun make-shadow-declarations (shadows)
   (mapcar (lambda (s) `(,s 0)) shadows))
 
@@ -99,6 +99,7 @@
                                   (relations nil)
                                   (proof-stack nil) (caller nil))
 ;  (sb-ext:gc :full t)
+  (declare (ignore caller proof-stack))
   (setf *snark-verbose* verbose)
   (let* ((*signature* signature)
          (*line-number* 0)
