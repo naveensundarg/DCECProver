@@ -48,10 +48,10 @@
          (implies 
           (desires I now (holds (disabled (* I) ?a) ?time))
           (intends I now (happens (action (* I) (harm ?a)) ?time))))
-   '(knows I t1 (forall ((act ActionType) (t1 Moment) (t2 Moment))
+   '(knows I now (forall ((act ActionType) (time Moment))
                  (iff 
-                  (happens (action (* I) (refrain act) t2))
-                  (not (happens (action (* I)  act t2))))))
+                  (happens (action (* I) (refrain act) time))
+                  (not (happens (action (* I)  act time))))))
    '(< tp now)
    '(< now tf)))
 

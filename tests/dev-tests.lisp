@@ -108,7 +108,7 @@
                   (knows jack now (not 
                                    (exists (x) (implies (Bird x) 
                                                         (forall (y) (Bird y))))))))
-			   '(not P))))
+          '(not P))))
 
 (5am:test dt16 "Referential opacity should be satisfied."
   (5am:is-false
@@ -125,4 +125,4 @@
           '(knows a now (= morning_star morning_star)))
     '(and P (not P)) )))
 
-(5am:test dt18 "")
+
