@@ -1,5 +1,5 @@
 
-Got to: https://github.com/naveensundarg/ShadowProver for the latest. 
+Got to: https://github.com/naveensundarg/ShadowProver for the latest version of the prover. 
 
 ## Theory
 
